@@ -1,0 +1,183 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+
+      # ============================================================
+      # CORS
+      # ============================================================
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+
+      # ============================================================
+      # ROUTES
+      # ============================================================
+      routes:
+
+        # ------------------------------------------------------------
+        # Payroll Service
+        # ------------------------------------------------------------
+        - id: payroll-service-route
+          uri: ${PAYROLL_SERVICE_URL:http://localhost:8081}
+
+          predicates:
+            - Path=/api/payroll/**
+
+          filters:
+            # Correlation ID
+            - AddRequestHeader=X-Correlation-Id, generated
+
+            # Circuit breaker ONLY for Payroll
+            - name: CircuitBreaker
+              args:
+                name: payrollCircuitBreaker
+                fallbackUri: forward:/gateway/fallback
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
+        # Finance Service REST
+        # ------------------------------------------------------------
+        - id: finance-service-rest-route
+          uri: ${FINANCE_SERVICE_URL:http://localhost:8082}
+
+          predicates:
+            - Path=/api/finance/**
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+            # Circuit breaker ONLY for Finance
+            - name: CircuitBreaker
+              args:
+                name: financeCircuitBreaker
+                fallbackUri: forward:/gateway/fallback
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+      # ============================================================
+      # HTTP CLIENT
+      # ============================================================
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
+
+
+# ================================================================
+# ACTUATOR
+# ================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics,prometheus
+
+  endpoint:
+    health:
+      show-details: always
+
+    gateway:
+      enabled: true
+
+
+# ================================================================
+# RESILIENCE4J
+# ================================================================
+resilience4j:
+
+  circuitbreaker:
+
+    configs:
+
+      default:
+
+        # Evaluate last 20 requests
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 20
+
+        # Don't open circuit after only a few requests
+        minimum-number-of-calls: 10
+
+        # Open when 60% or more are genuine failures
+        failure-rate-threshold: 60
+
+        # Keep circuit open for 30 seconds
+        wait-duration-in-open-state: 30s
+
+        # Allow 3 test requests in HALF_OPEN
+        permitted-number-of-calls-in-half-open-state: 3
+
+        # Automatically move OPEN -> HALF_OPEN
+        automatic-transition-from-open-to-half-open-enabled: true
+
+        # Only infrastructure/downstream failures
+        # should count as circuit-breaker failures.
+        record-exceptions:
+          - java.io.IOException
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.cloud.gateway.support.NotFoundException
+
+
+    instances:
+
+      # ------------------------------------------------------------
+      # Payroll Circuit Breaker
+      # ------------------------------------------------------------
+      payrollCircuitBreaker:
+        base-config: default
+
+      # ------------------------------------------------------------
+      # Finance Circuit Breaker
+      # ------------------------------------------------------------
+      financeCircuitBreaker:
+        base-config: default
+
+
+  timelimiter:
+
+    configs:
+
+      default:
+        timeout-duration: 30s
+        cancel-running-future: true
+
+    instances:
+
+      payrollCircuitBreaker:
+        base-config: default
+
+      financeCircuitBreaker:
+        base-config: default
+
+
+# ================================================================
+# LOGGING
+# ================================================================
+logging:
+  level:
+
+    # Keep Gateway information visible
+    org.springframework.cloud.gateway: INFO
+
+    # Your application
+    com.financeapp.gateway: DEBUG
+
+    # Resilience4j
+    io.github.resilience4j: INFO
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
