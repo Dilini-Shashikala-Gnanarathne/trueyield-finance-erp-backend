@@ -1,0 +1,69 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: finance-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/finance_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: FinanceHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# ============================================================
+# gRPC Server Configuration (net.devh starter)
+#
+# The gRPC server runs on a separate port from the REST (HTTP) server.
+# This is the standard pattern: REST on HTTP port, gRPC on gRPC port.
+#
+# Security note: negotiation-type: plaintext means NO TLS.
+# For production: use TLS (one-way) or mTLS (mutual) to:
+# - Encrypt data in transit
+# - Authenticate the calling service (mTLS)
+# Example production config:
+#   negotiation-type: tls
+#   security.certificate-chain: /certs/server.crt
+#   security.private-key: /certs/server.key
+# ============================================================
+grpc:
+  server:
+    port: ${GRPC_PORT:9090}
+    # Use plaintext for development. Configure TLS/mTLS in production.
+    # See README section on "Security" for production configuration guidance.
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.financeapp.finance: DEBUG
+    io.grpc: INFO
+    net.devh: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{grpc.method}] %logger{36} - %msg%n"

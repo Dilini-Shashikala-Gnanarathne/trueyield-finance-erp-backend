@@ -1,0 +1,6 @@
+com\financeapp\finance\integration\FinanceIntegrationTest.class
+com\financeapp\finance\service\JournalEntryApplicationServiceTest$CreateJournalEntry.class
+com\financeapp\finance\service\JournalEntryApplicationServiceTest.class
+com\financeapp\finance\grpc\FinanceGrpcServerTest.class
+com\financeapp\finance\grpc\FinanceGrpcServerTest$CheckHealthRpc.class
+com\financeapp\finance\grpc\FinanceGrpcServerTest$CreateJournalEntryRpc.class

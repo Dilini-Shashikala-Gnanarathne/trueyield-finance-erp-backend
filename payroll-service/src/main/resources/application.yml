@@ -1,0 +1,115 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: payroll-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/payroll_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: PayrollHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # Let Flyway manage the schema; Hibernate only validates
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false         # Enable in development for debugging: ${SHOW_SQL:false}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # ============================================================
+  # Kafka Producer Configuration — TEMPORARILY DISABLED
+  # TODO: Re-enable when Kafka broker is available.
+  # Uncomment the block below and re-enable spring-kafka in pom.xml.
+  #
+  # bootstrap-servers: resolved from KAFKA_BOOTSTRAP_SERVERS env var.
+  #   - In Docker: kafka:29092 (internal Docker network listener)
+  #   - Locally:   localhost:9092
+  #
+  # acks=all: Wait for all in-sync replicas to acknowledge the write.
+  #   Prevents message loss at the cost of slightly higher latency.
+  #   Acceptable for finance events where durability > speed.
+  #
+  # retries=3: Retry transient failures (leader election, network blip).
+  #   Combined with idempotent producer this avoids duplicates.
+  #
+  # enable.idempotence=true: Exactly-once delivery to a single partition.
+  #   Kafka deduplicates retried records using sequence numbers.
+  # ============================================================
+  kafka:
+     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+     producer:
+       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+       acks: all
+       retries: 3
+       properties:
+         enable.idempotence: true
+         max.in.flight.requests.per.connection: 1
+         spring.json.add.type.headers: false
+
+# ============================================================
+# gRPC Client Configuration (net.devh starter)
+#
+# The @GrpcClient("finance-service") annotation in GrpcFinanceClient
+# references the "finance-service" key here.
+#
+# Deadline: maximum time to wait for Finance Service to respond.
+# A 5-second deadline is reasonable for a synchronous database operation.
+# If Finance Service takes longer, the gRPC call fails with DEADLINE_EXCEEDED.
+#
+# Why deadlines matter:
+# Without a deadline, a slow Finance Service would hold Payroll threads
+# indefinitely, eventually exhausting the thread pool and causing
+# Payroll Service itself to become unresponsive — a cascading failure.
+# Deadlines are the gRPC equivalent of connection/read timeouts in REST.
+# ============================================================
+grpc:
+  client:
+    finance-service:
+      address: ${FINANCE_GRPC_HOST:localhost}:${FINANCE_GRPC_PORT:9090}
+      negotiation-type: plaintext   # No TLS for development. Use TLS/mTLS in production.
+      # Deadline applied to every RPC call. Configurable via environment variable.
+      # Format: duration string, e.g., "5s", "2000ms"
+      deadline: ${GRPC_DEADLINE:5s}
+      keep-alive-time: 30s
+      keep-alive-timeout: 10s
+      keep-alive-without-calls: false
+
+# Finance REST client configuration (for benchmark comparison)
+finance:
+  rest:
+    base-url: ${FINANCE_REST_URL:http://localhost:8082}
+    timeout-seconds: ${FINANCE_REST_TIMEOUT:5}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.financeapp.payroll: DEBUG
+    io.grpc: INFO
+    net.devh: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] [%X{payrollReference}] %logger{36} - %msg%n"

@@ -1,0 +1,16 @@
+com\financeapp\finance\domain\JournalEntryEntity.class
+com\financeapp\finance\domain\JournalEntryStatus.class
+com\financeapp\finance\domain\JournalEntryLineEntity.class
+com\financeapp\finance\dto\CreateJournalEntryCommand.class
+com\financeapp\finance\FinanceServiceApplication.class
+com\financeapp\finance\dto\JournalEntryResult$JournalEntryResultBuilder.class
+com\financeapp\finance\controller\FinanceRestController.class
+com\financeapp\finance\dto\JournalEntryResult.class
+com\financeapp\finance\grpc\FinanceGrpcServer.class
+com\financeapp\finance\service\JournalEntryApplicationService.class
+com\financeapp\finance\repository\JournalEntryRepository.class
+com\financeapp\finance\dto\CreateJournalEntryCommand$CreateJournalEntryCommandBuilder.class
+com\financeapp\finance\exception\FinanceExceptionHandler.class
+com\financeapp\finance\domain\JournalEntryLineEntity$LineType.class
+com\financeapp\finance\domain\JournalEntryType.class
+com\financeapp\finance\controller\FinanceRestController$CreateJournalEntryRestRequest.class
