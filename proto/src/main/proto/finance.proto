@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package finance;
+
+option java_package = "com.financeapp.finance.grpc.proto";
+option java_outer_classname = "FinanceProto";
+option java_multiple_files = true;
+
+// ============================================================
+// Finance Service gRPC Contract
+//
+// Design decisions:
+//
+// 1. AMOUNT REPRESENTATION:
+//    Financial amounts are represented as string (e.g., "2500000.00").
+//    Reason: protobuf has no decimal type. Using double/float would
+//    introduce IEEE 754 floating-point imprecision — unacceptable for
+//    financial data. String representation of BigDecimal preserves
+//    exact precision. The alternative (cents as int64) works but
+//    introduces currency-specific scaling logic that adds complexity.
+//    String is simpler and explicit.
+//
+// 2. IDEMPOTENCY:
+//    The `reference` field (e.g., "PAY-2026-08-0001") acts as the
+//    idempotency key. Finance service checks for existing journal
+//    entries with this reference before creating a new one.
+//
+// 3. CURRENCY:
+//    Explicit currency field (ISO 4217) because multi-currency
+//    support is a common requirement in Finance ERP systems.
+// ============================================================
+
+service FinanceService {
+
+    // Create a double-entry journal entry in the Finance ledger.
+    // Idempotent: calling with the same reference returns the existing entry.
+    rpc CreateJournalEntry(CreateJournalEntryRequest)
+        returns (CreateJournalEntryResponse);
+
+    // Health check for circuit-breaker / monitoring purposes
+    rpc CheckHealth(HealthCheckRequest)
+        returns (HealthCheckResponse);
+}
+
+// ============================================================
+// Journal Entry Messages
+// ============================================================
+
+message CreateJournalEntryRequest {
+    // Business reference — acts as idempotency key.
+    // Must be unique per journal entry, e.g., "PAY-2026-08-0001".
+    string reference = 1;
+
+    // Human-readable description of the transaction.
+    string description = 2;
+
+    // Debit account code, e.g., "SALARY_EXPENSE"
+    string debit_account = 3;
+
+    // Credit account code, e.g., "PAYROLL_PAYABLE"
+    string credit_account = 4;
+
+    // Transaction amount as a precise decimal string, e.g., "2500000.00"
+    // Using string (not double/float) to preserve BigDecimal precision.
+    string amount = 5;
+
+    // ISO 4217 currency code, e.g., "USD", "EUR", "GBP"
+    string currency = 6;
+
+    // Originating service / source system for audit trail
+    string source_system = 7;
+
+    // Journal entry type for categorization
+    JournalEntryType entry_type = 8;
+}
+
+message CreateJournalEntryResponse {
+    // The created (or existing, if idempotent) journal reference.
+    // Will match the reference from the request.
+    string journal_reference = 1;
+
+    // Status of the operation
+    JournalStatus status = 2;
+
+    // Human-readable message (useful for debugging / logging)
+    string message = 3;
+
+    // Whether this was an idempotent return (entry already existed)
+    bool was_idempotent = 4;
+
+    // ISO 8601 timestamp of when the journal was created
+    string created_at = 5;
+}
+
+// ============================================================
+// Health Check Messages
+// ============================================================
+
+message HealthCheckRequest {
+    string service = 1;
+}
+
+message HealthCheckResponse {
+    string status = 1;
+    string version = 2;
+}
+
+// ============================================================
+// Enumerations
+// ============================================================
+
+enum JournalEntryType {
+    JOURNAL_ENTRY_TYPE_UNSPECIFIED = 0;
+    PAYROLL                        = 1;
+    ACCOUNTS_PAYABLE               = 2;
+    ACCOUNTS_RECEIVABLE            = 3;
+    GENERAL_LEDGER                 = 4;
+}
+
+enum JournalStatus {
+    JOURNAL_STATUS_UNSPECIFIED = 0;
+    CREATED                    = 1;
+    POSTED                     = 2;
+    REVERSED                   = 3;
+    FAILED                     = 4;
+}

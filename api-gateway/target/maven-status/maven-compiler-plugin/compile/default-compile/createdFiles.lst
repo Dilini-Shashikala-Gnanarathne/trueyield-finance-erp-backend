@@ -1,0 +1,2 @@
+com\financeapp\gateway\ApiGatewayApplication.class
+com\financeapp\gateway\GatewayFallbackController.class

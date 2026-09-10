@@ -1,0 +1,51 @@
+
+# =============================================================================
+# Finance ERP — Docker Compose
+#
+# Services:
+#   postgres             — PostgreSQL (payroll_db + finance_db)
+#   kafka                — Apache Kafka 3.7 in KRaft mode (no Zookeeper)
+#   finance-service      — Finance microservice (REST :8082 / gRPC :9090)
+#   payroll-service      — Payroll microservice (REST :8081) + Kafka producer
+#   notification-service — Kafka consumer (payroll events → notifications)
+#   api-gateway          — Spring Cloud Gateway (:8080)
+#
+# Startup order: postgres → kafka → finance → payroll → notification → gateway
+# =============================================================================
+
+networks:
+  finance-erp-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+
+services:
+services:
+
+  finance-service:
+    build:
+      context: ./backend
+      dockerfile: finance-service/Dockerfile
+
+  payroll-service:
+    build:
+      context: ./backend
+      dockerfile: payroll-service/Dockerfile
+
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
+
+  payslip-service:
+    build:
+      context: ./backend
+      dockerfile: payslip-service/Dockerfile
+
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
+

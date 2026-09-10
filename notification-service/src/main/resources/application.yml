@@ -1,0 +1,61 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: notification-service
+
+  # ============================================================
+  # Kafka Consumer Configuration
+  #
+  # bootstrap-servers: From KAFKA_BOOTSTRAP_SERVERS env var.
+  #   - In Docker: kafka:29092 (internal listener)
+  #   - Locally:   localhost:9092
+  #
+  # group-id: notification-service — unique consumer group.
+  #   Each group independently tracks its own offsets, so adding
+  #   a new consumer group (audit-service) won't affect this one.
+  #
+  # enable-auto-commit: false — offsets committed manually after
+  #   successful processing (AckMode.MANUAL in KafkaConsumerConfig).
+  #   This prevents message loss if the service crashes mid-processing.
+  #
+  # auto-offset-reset: earliest — on first startup (no prior committed
+  #   offset), read all existing events from the beginning of the topic.
+  #   This ensures we don't miss payroll events that arrived while this
+  #   service was down.
+  # ============================================================
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.financeapp.*"
+        spring.json.use.type.headers: false
+
+# Topic configuration (referenced in @KafkaListener via ${kafka.topic.payroll-events})
+kafka:
+  topic:
+    payroll-events: payroll.events
+
+# Actuator — health endpoint for Docker healthcheck
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.financeapp.notification: INFO
+    org.apache.kafka: WARN
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

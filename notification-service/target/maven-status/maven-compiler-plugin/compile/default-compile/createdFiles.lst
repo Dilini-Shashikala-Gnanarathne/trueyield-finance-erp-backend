@@ -1,0 +1,4 @@
+com\financeapp\notification\config\KafkaConsumerConfig.class
+com\financeapp\notification\NotificationServiceApplication.class
+com\financeapp\notification\event\PayrollProcessedEvent.class
+com\financeapp\notification\listener\PayrollEventListener.class

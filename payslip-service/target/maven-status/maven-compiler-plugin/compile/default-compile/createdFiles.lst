@@ -1,0 +1,7 @@
+com\financeapp\payslip\event\PayrollProcessedEvent.class
+com\financeapp\payslip\model\PaySlip.class
+com\financeapp\payslip\model\PaySlip$PaySlipBuilder.class
+com\financeapp\payslip\listener\PayslipEventListener.class
+com\financeapp\payslip\PayslipServiceApplication.class
+com\financeapp\payslip\config\KafkaConsumerConfig.class
+com\financeapp\payslip\service\PayslipGeneratorService.class
