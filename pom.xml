@@ -25,6 +25,7 @@
         <module>finance-service</module>
         <module>notification-service</module>
         <module>payslip-service</module>
+        <module>user-service</module>
     </modules>
 
     <properties>

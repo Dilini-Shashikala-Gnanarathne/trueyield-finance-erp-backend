@@ -47,6 +47,22 @@ spring:
             response-timeout: 30000
 
         # ------------------------------------------------------------
+        # User Service
+        # ------------------------------------------------------------
+        - id: user-service-route
+          uri: ${USER_SERVICE_URL:http://localhost:8085}
+
+          predicates:
+            - Path=/api/auth/**,/api/lookups/**,/api/students/**,/api/admins/**
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
         # Finance Service REST
         # ------------------------------------------------------------
         - id: finance-service-rest-route
