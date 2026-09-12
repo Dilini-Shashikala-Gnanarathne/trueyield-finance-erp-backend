@@ -47,6 +47,23 @@ spring:
             response-timeout: 30000
 
         # ------------------------------------------------------------
+        # ------------------------------------------------------------
+        # Auth Service
+        # ------------------------------------------------------------
+        - id: auth-service-route
+          uri: ${AUTH_SERVICE_URL:${USER_SERVICE_URL:http://localhost:8085}}
+
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/profile/**,/api/auth/**
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
         # Finance Service REST
         # ------------------------------------------------------------
         - id: finance-service-rest-route
