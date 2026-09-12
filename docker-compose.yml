@@ -24,10 +24,10 @@ volumes:
 
 services:
 
-  user-service:
+  auth-service:
     build:
       context: ./backend
-      dockerfile: user-service/Dockerfile
+      dockerfile: auth-service/Dockerfile
 
   finance-service:
     build:
