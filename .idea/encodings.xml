@@ -7,6 +7,8 @@
     <file url="file://$PROJECT_DIR$/auth-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/finance-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/finance-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marketplace-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marketplace-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/notification-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/notification-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payroll-service/src/main/java" charset="UTF-8" />

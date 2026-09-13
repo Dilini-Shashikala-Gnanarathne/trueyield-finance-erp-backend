@@ -29,6 +29,11 @@ services:
       context: ./backend
       dockerfile: auth-service/Dockerfile
 
+  marketplace-service:
+    build:
+      context: ./backend
+      dockerfile: marketplace-service/Dockerfile
+
   finance-service:
     build:
       context: ./backend

@@ -26,6 +26,7 @@
         <module>notification-service</module>
         <module>payslip-service</module>
         <module>auth-service</module>
+        <module>marketplace-service</module>
     </modules>
 
     <properties>
