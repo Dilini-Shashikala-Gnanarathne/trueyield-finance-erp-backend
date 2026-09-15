@@ -1,6 +1,7 @@
 package com.financeapp.marketplace.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.financeapp.marketplace.client.AuthServiceClient;
 import com.financeapp.marketplace.domain.entity.ListingEntity;
 import com.financeapp.marketplace.domain.entity.ListingImageEntity;
 import com.financeapp.marketplace.domain.entity.MarketplaceOutboxEntity;
@@ -8,17 +9,23 @@ import com.financeapp.marketplace.domain.entity.ProduceEntity;
 import com.financeapp.marketplace.domain.enums.ListingStatus;
 import com.financeapp.marketplace.domain.enums.LocationVisibility;
 import com.financeapp.marketplace.domain.enums.UserRole;
+import com.financeapp.marketplace.dto.PageResponse;
 import com.financeapp.marketplace.dto.listing.*;
 import com.financeapp.marketplace.dto.produce.ProduceResponse;
 import com.financeapp.marketplace.exception.BusinessException;
 import com.financeapp.marketplace.exception.ResourceNotFoundException;
 import com.financeapp.marketplace.repository.ListingImageRepository;
 import com.financeapp.marketplace.repository.ListingRepository;
+import com.financeapp.marketplace.repository.ListingSpecification;
 import com.financeapp.marketplace.repository.MarketplaceOutboxRepository;
 import com.financeapp.marketplace.repository.ProduceRepository;
 import com.financeapp.marketplace.security.SecurityPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +45,7 @@ public class ListingService {
     private final MarketplaceOutboxRepository outboxRepository;
     private final ListingValidationService validationService;
     private final ProduceService produceService;
+    private final AuthServiceClient authServiceClient;
     private final ObjectMapper objectMapper;
 
     /**
@@ -311,12 +319,117 @@ public class ListingService {
                 .toList();
     }
 
+    /**
+     * DISC-001, DISC-002, DISC-003, DISC-004:
+     * Paginated marketplace discovery with keyword search, multi-attribute filtering, and sorting.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<ListingSummaryResponse> searchListings(ListingSearchCriteria criteria) {
+        int page = criteria.getPage() >= 0 ? criteria.getPage() : 0;
+        int size = criteria.getSize() > 0 ? Math.min(criteria.getSize(), 100) : 20;
+
+        Sort sort;
+        String sortBy = criteria.getSortBy() != null ? criteria.getSortBy().toUpperCase() : "NEWEST";
+        switch (sortBy) {
+            case "PRICE_ASC" -> sort = Sort.by(Sort.Direction.ASC, "pricePerUnit");
+            case "PRICE_DESC" -> sort = Sort.by(Sort.Direction.DESC, "pricePerUnit");
+            case "HARVEST_DATE_ASC" -> sort = Sort.by(Sort.Direction.ASC, "harvestDate");
+            case "HARVEST_DATE_DESC" -> sort = Sort.by(Sort.Direction.DESC, "harvestDate");
+            default -> sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<ListingEntity> entityPage = listingRepository.findAll(ListingSpecification.build(criteria), pageable);
+
+        Page<ListingSummaryResponse> summaryPage = entityPage.map(this::toSummaryResponse);
+        return PageResponse.from(summaryPage);
+    }
+
     @Transactional(readOnly = true)
     public List<ListingSummaryResponse> getActiveListings() {
         return listingRepository.findByStatusOrderByCreatedAtDesc(ListingStatus.ACTIVE)
                 .stream()
                 .map(this::toSummaryResponse)
                 .toList();
+    }
+
+    /**
+     * ORDER-003 & ORDER-004: Atomically reserve quantity and protect against overselling.
+     */
+    @Transactional
+    public StockOperationResponse reserveStock(String listingId, ReserveStockRequest request) {
+        if (request.getQuantity() == null || request.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Reserved quantity must be greater than zero");
+        }
+
+        ListingEntity listing = getListingOrThrow(listingId);
+        if (listing.getStatus() != ListingStatus.ACTIVE) {
+            throw new BusinessException("Listing is not available for orders (status: " + listing.getStatus() + ")");
+        }
+
+        if (listing.getMinOrderQuantity() != null && request.getQuantity().compareTo(listing.getMinOrderQuantity()) < 0) {
+            throw new BusinessException("Requested quantity " + request.getQuantity() + " is below minimum order quantity of " + listing.getMinOrderQuantity());
+        }
+
+        int rows = listingRepository.reserveQuantityAtomically(listingId, request.getQuantity());
+        if (rows == 0) {
+            // Re-fetch to produce detailed exception message
+            ListingEntity current = getListingOrThrow(listingId);
+            throw new BusinessException("Insufficient stock available: requested " + request.getQuantity() +
+                    " " + current.getUnit() + ", but only " + current.getAvailableQuantity() + " " + current.getUnit() + " remaining.");
+        }
+
+        // Re-read updated entity state
+        ListingEntity updated = getListingOrThrow(listingId);
+        if (updated.getAvailableQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            updated.setStatus(ListingStatus.SOLD_OUT);
+            listingRepository.save(updated);
+            log.info("Listing {} is now SOLD_OUT", listingId);
+        }
+
+        recordOutboxEvent("StockReserved", updated);
+
+        return StockOperationResponse.builder()
+                .listingId(listingId)
+                .reservedQuantity(request.getQuantity())
+                .remainingAvailableQuantity(updated.getAvailableQuantity())
+                .status(updated.getStatus())
+                .success(true)
+                .message("Stock reserved successfully")
+                .build();
+    }
+
+    /**
+     * ORDER-007: Release reserved quantity back into available stock when order is rejected/cancelled.
+     */
+    @Transactional
+    public StockOperationResponse releaseStock(String listingId, ReserveStockRequest request) {
+        if (request.getQuantity() == null || request.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Released quantity must be greater than zero");
+        }
+
+        int rows = listingRepository.releaseQuantityAtomically(listingId, request.getQuantity());
+        if (rows == 0) {
+            throw new BusinessException("Failed to release stock: invalid reserved quantity or listing not found.");
+        }
+
+        ListingEntity updated = getListingOrThrow(listingId);
+        if (updated.getStatus() == ListingStatus.SOLD_OUT && updated.getAvailableQuantity().compareTo(BigDecimal.ZERO) > 0) {
+            updated.setStatus(ListingStatus.ACTIVE);
+            listingRepository.save(updated);
+            log.info("Listing {} status restored from SOLD_OUT to ACTIVE", listingId);
+        }
+
+        recordOutboxEvent("StockReleased", updated);
+
+        return StockOperationResponse.builder()
+                .listingId(listingId)
+                .reservedQuantity(request.getQuantity())
+                .remainingAvailableQuantity(updated.getAvailableQuantity())
+                .status(updated.getStatus())
+                .success(true)
+                .message("Stock released successfully")
+                .build();
     }
 
     // Helper methods
@@ -400,9 +513,12 @@ public class ListingService {
                 .map(this::toImageResponse)
                 .toList();
 
+        SellerSummaryDto sellerSummary = authServiceClient.getSellerPublicProfile(entity.getFarmerId());
+
         return ListingResponse.builder()
                 .id(entity.getId())
                 .farmerId(entity.getFarmerId())
+                .seller(sellerSummary)
                 .produce(produceResponse)
                 .title(entity.getTitle())
                 .description(entity.getDescription())

@@ -21,6 +21,7 @@ public class ListingResponse {
 
     private String id;
     private String farmerId;
+    private SellerSummaryDto seller;
     private ProduceResponse produce;
     private String title;
     private String description;

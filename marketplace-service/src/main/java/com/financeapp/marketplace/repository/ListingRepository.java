@@ -21,4 +21,27 @@ public interface ListingRepository extends JpaRepository<ListingEntity, String>,
 
     @Query("SELECT l FROM ListingEntity l WHERE l.status = :status AND l.produce.id = :produceId")
     List<ListingEntity> findByProduceIdAndStatus(@Param("produceId") String produceId, @Param("status") ListingStatus status);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT l FROM ListingEntity l WHERE l.id = :id")
+    java.util.Optional<ListingEntity> findByIdForUpdate(@Param("id") String id);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE ListingEntity l SET l.availableQuantity = l.availableQuantity - :qty, " +
+           "l.reservedQuantity = l.reservedQuantity + :qty, " +
+           "l.version = l.version + 1 " +
+           "WHERE l.id = :id AND l.availableQuantity >= :qty AND l.status = 'ACTIVE'")
+    int reserveQuantityAtomically(@Param("id") String id, @Param("qty") java.math.BigDecimal qty);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE ListingEntity l SET l.availableQuantity = l.availableQuantity + :qty, " +
+           "l.reservedQuantity = l.reservedQuantity - :qty, " +
+           "l.version = l.version + 1 " +
+           "WHERE l.id = :id AND l.reservedQuantity >= :qty")
+    int releaseQuantityAtomically(@Param("id") String id, @Param("qty") java.math.BigDecimal qty);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE ListingEntity l SET l.status = :newStatus WHERE l.id = :id")
+    int updateStatus(@Param("id") String id, @Param("newStatus") ListingStatus newStatus);
 }
+

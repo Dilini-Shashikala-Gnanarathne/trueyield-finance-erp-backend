@@ -130,9 +130,28 @@ public class ListingController {
     }
 
     @GetMapping
-    @Operation(summary = "Browse active listings in marketplace")
-    public ResponseEntity<ApiResponse<List<ListingSummaryResponse>>> getActiveListings() {
-        List<ListingSummaryResponse> listings = listingService.getActiveListings();
-        return ResponseEntity.ok(ApiResponse.ok("Active listings retrieved.", listings));
+    @Operation(summary = "Browse and search active listings in marketplace (DISC-001, DISC-002, DISC-003, DISC-004)")
+    public ResponseEntity<ApiResponse<com.financeapp.marketplace.dto.PageResponse<ListingSummaryResponse>>> searchListings(
+            @ModelAttribute ListingSearchCriteria criteria) {
+        com.financeapp.marketplace.dto.PageResponse<ListingSummaryResponse> response = listingService.searchListings(criteria);
+        return ResponseEntity.ok(ApiResponse.ok("Active listings retrieved successfully.", response));
+    }
+
+    @PostMapping("/{id}/reserve")
+    @Operation(summary = "Atomically reserve listing quantity (ORDER-003, ORDER-004)")
+    public ResponseEntity<ApiResponse<StockOperationResponse>> reserveStock(
+            @PathVariable String id,
+            @Valid @RequestBody ReserveStockRequest request) {
+        StockOperationResponse response = listingService.reserveStock(id, request);
+        return ResponseEntity.ok(ApiResponse.ok("Stock reserved successfully.", response));
+    }
+
+    @PostMapping("/{id}/release")
+    @Operation(summary = "Atomically release reserved quantity back to available stock (ORDER-007)")
+    public ResponseEntity<ApiResponse<StockOperationResponse>> releaseStock(
+            @PathVariable String id,
+            @Valid @RequestBody ReserveStockRequest request) {
+        StockOperationResponse response = listingService.releaseStock(id, request);
+        return ResponseEntity.ok(ApiResponse.ok("Stock released successfully.", response));
     }
 }
