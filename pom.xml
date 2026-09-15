@@ -27,6 +27,7 @@
         <module>payslip-service</module>
         <module>auth-service</module>
         <module>marketplace-service</module>
+        <module>order-service</module>
     </modules>
 
     <properties>

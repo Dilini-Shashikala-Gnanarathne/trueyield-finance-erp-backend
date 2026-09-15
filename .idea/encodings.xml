@@ -11,6 +11,8 @@
     <file url="file://$PROJECT_DIR$/marketplace-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/notification-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/notification-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/order-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/order-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payroll-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payroll-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payslip-service/src/main/java" charset="UTF-8" />
