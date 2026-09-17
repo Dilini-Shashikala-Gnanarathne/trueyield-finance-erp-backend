@@ -64,6 +64,22 @@ spring:
             response-timeout: 30000
 
         # ------------------------------------------------------------
+        # Marketplace Service
+        # ------------------------------------------------------------
+        - id: marketplace-service-route
+          uri: ${MARKETPLACE_SERVICE_URL:http://localhost:8086}
+
+          predicates:
+            - Path=/api/v1/produce/**,/api/v1/listings/**
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
         # Finance Service REST
         # ------------------------------------------------------------
         - id: finance-service-rest-route
