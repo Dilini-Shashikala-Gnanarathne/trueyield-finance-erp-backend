@@ -71,7 +71,10 @@ class ListingDiscoveryAndReservationTest {
                 .id("prod-rambutan-01")
                 .code("RAMBUTAN_MALWANA")
                 .name("Malwana Rambutan")
-                .unit("KG")
+                .defaultUnit("KG")
+                .supportedUnits("KG")
+                .supportedGrades("PREMIUM,STANDARD,PROCESSING")
+                .category(com.financeapp.marketplace.domain.enums.ProduceCategory.FRUIT)
                 .isActive(true)
                 .build();
 
@@ -86,7 +89,7 @@ class ListingDiscoveryAndReservationTest {
                 .reservedQuantity(BigDecimal.ZERO)
                 .unit("KG")
                 .pricePerUnit(new BigDecimal("450.00"))
-                .qualityGrade(QualityGrade.GRADE_A)
+                .qualityGrade(QualityGrade.PREMIUM)
                 .harvestDate(LocalDate.now())
                 .status(ListingStatus.ACTIVE)
                 .minOrderQuantity(new BigDecimal("5.00"))
@@ -138,10 +141,7 @@ class ListingDiscoveryAndReservationTest {
                         .build()
         );
 
-        SecurityPrincipal buyerPrincipal = SecurityPrincipal.builder()
-                .userId("buyer-999")
-                .role(UserRole.BUYER)
-                .build();
+        SecurityPrincipal buyerPrincipal = new SecurityPrincipal("buyer-999", "Buyer Name", "+94770000000", "buyer@test.com", UserRole.BUYER);
 
         ListingResponse response = listingService.getListingById("list-001", buyerPrincipal);
 
