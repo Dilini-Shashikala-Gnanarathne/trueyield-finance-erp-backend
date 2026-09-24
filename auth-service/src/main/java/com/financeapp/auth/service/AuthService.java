@@ -81,7 +81,7 @@ public class AuthService {
                 .createdAt(Instant.now())
                 .build();
 
-        farmerProfileRepository.save(profile);
+        profile = farmerProfileRepository.save(profile);
         user.setFarmerProfile(profile);
 
         log.info("Farmer account created successfully: userId={}, phone={}", userId, phone);
@@ -128,7 +128,7 @@ public class AuthService {
                 .createdAt(Instant.now())
                 .build();
 
-        buyerProfileRepository.save(profile);
+        profile = buyerProfileRepository.save(profile);
         user.setBuyerProfile(profile);
 
         log.info("Buyer account created successfully: userId={}, phone={}", userId, phone);
