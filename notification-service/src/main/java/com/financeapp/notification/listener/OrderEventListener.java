@@ -32,12 +32,26 @@ public class OrderEventListener {
         log.info("╚══════════════════════════════════════════════════════════╝");
 
         try {
-            if ("PENDING".equals(event.getStatus())) {
-                log.info("📧 [EMAIL] Sending New Order Notification to Farmer ID: {}", event.getFarmerId());
-                log.info("📧 [SMS] Alerting Farmer {} about Order {}", event.getFarmerId(), event.getOrderNumber());
-            } else if ("ACCEPTED".equals(event.getStatus()) || "REJECTED".equals(event.getStatus())) {
-                log.info("📧 [EMAIL] Notifying Buyer ID: {} that Order {} is {}", 
-                         event.getBuyerId(), event.getOrderNumber(), event.getStatus());
+            switch (event.getStatus()) {
+                case "PENDING":
+                    log.info("📧 [EMAIL] Sending New Order Notification to Farmer ID: {}", event.getFarmerId());
+                    log.info("📱 [SMS] Alerting Farmer {} about New Order {}", event.getFarmerId(), event.getOrderNumber());
+                    break;
+                case "ACCEPTED":
+                    log.info("📧 [EMAIL] Notifying Buyer ID: {} that Order {} is ACCEPTED", event.getBuyerId(), event.getOrderNumber());
+                    break;
+                case "REJECTED":
+                    log.info("📧 [EMAIL] Notifying Buyer ID: {} that Order {} was REJECTED", event.getBuyerId(), event.getOrderNumber());
+                    break;
+                case "FULFILLED":
+                    log.info("📧 [EMAIL] Notifying Buyer ID: {} that Order {} is READY/FULFILLED for collection/delivery", event.getBuyerId(), event.getOrderNumber());
+                    break;
+                case "COMPLETED":
+                    log.info("📧 [EMAIL] Notifying Farmer ID: {} and Buyer ID: {} that Order {} is COMPLETED", 
+                             event.getFarmerId(), event.getBuyerId(), event.getOrderNumber());
+                    break;
+                default:
+                    log.info("ℹ️ Unhandled order status transition for order {}: {}", event.getOrderNumber(), event.getStatus());
             }
 
             // Acknowledge offset manually
