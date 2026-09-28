@@ -35,4 +35,12 @@ public class DashboardController {
         BuyerDashboardDto dashboard = dashboardService.getBuyerDashboard(principal.getUserId());
         return ResponseEntity.ok(ApiResponse.ok("Buyer dashboard retrieved successfully", dashboard));
     }
+
+    @GetMapping("/farmer/sales")
+    @PreAuthorize("hasRole('FARMER')")
+    public ResponseEntity<ApiResponse<com.financeapp.order.dto.dashboard.SalesSummaryDto>> getFarmerSalesSummary(
+            @AuthenticationPrincipal SecurityPrincipal principal) {
+        com.financeapp.order.dto.dashboard.SalesSummaryDto summary = dashboardService.getFarmerSalesSummary(principal.getUserId());
+        return ResponseEntity.ok(ApiResponse.ok("Farmer sales summary retrieved successfully", summary));
+    }
 }

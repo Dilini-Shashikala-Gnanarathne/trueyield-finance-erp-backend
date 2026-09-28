@@ -45,4 +45,17 @@ public class DashboardService {
                 .totalSpent(totalSpent)
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public com.financeapp.order.dto.dashboard.SalesSummaryDto getFarmerSalesSummary(String farmerId) {
+        java.math.BigDecimal totalSales = orderRepository.sumTotalSalesByFarmerIdAndStatus(farmerId, OrderStatus.COMPLETED);
+        java.util.List<com.financeapp.order.dto.dashboard.ProduceSalesDto> salesByProduce = 
+            orderRepository.findSalesByProduceForFarmer(farmerId, OrderStatus.COMPLETED);
+
+        return com.financeapp.order.dto.dashboard.SalesSummaryDto.builder()
+                .farmerId(farmerId)
+                .totalOverallRevenue(totalSales)
+                .salesByProduce(salesByProduce)
+                .build();
+    }
 }

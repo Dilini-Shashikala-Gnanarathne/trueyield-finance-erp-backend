@@ -31,4 +31,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String> {
 
     @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM OrderEntity o WHERE o.buyerId = :buyerId AND o.status = :status")
     java.math.BigDecimal sumTotalSpentByBuyerIdAndStatus(@org.springframework.data.repository.query.Param("buyerId") String buyerId, @org.springframework.data.repository.query.Param("status") OrderStatus status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT new com.financeapp.order.dto.dashboard.ProduceSalesDto(o.produceName, SUM(o.quantity), SUM(o.totalAmount)) FROM OrderEntity o WHERE o.farmerId = :farmerId AND o.status = :status GROUP BY o.produceName")
+    java.util.List<com.financeapp.order.dto.dashboard.ProduceSalesDto> findSalesByProduceForFarmer(@org.springframework.data.repository.query.Param("farmerId") String farmerId, @org.springframework.data.repository.query.Param("status") OrderStatus status);
 }
