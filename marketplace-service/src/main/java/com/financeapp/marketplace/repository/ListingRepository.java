@@ -43,5 +43,6 @@ public interface ListingRepository extends JpaRepository<ListingEntity, String>,
     @org.springframework.data.jpa.repository.Modifying
     @Query("UPDATE ListingEntity l SET l.status = :newStatus WHERE l.id = :id")
     int updateStatus(@Param("id") String id, @Param("newStatus") ListingStatus newStatus);
-}
 
+    long countByStatus(ListingStatus status);
+}

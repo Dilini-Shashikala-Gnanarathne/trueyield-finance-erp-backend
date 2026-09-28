@@ -58,4 +58,19 @@ public class DashboardService {
                 .salesByProduce(salesByProduce)
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public com.financeapp.order.dto.dashboard.OrderStatsDto getAdminOrderStats() {
+        long totalOrders = orderRepository.count();
+        long pendingOrders = orderRepository.countByStatus(OrderStatus.PENDING);
+        long completedOrders = orderRepository.countByStatus(OrderStatus.COMPLETED);
+        java.math.BigDecimal totalRevenue = orderRepository.sumTotalAmountByStatus(OrderStatus.COMPLETED);
+
+        return com.financeapp.order.dto.dashboard.OrderStatsDto.builder()
+                .totalOrders(totalOrders)
+                .pendingOrders(pendingOrders)
+                .completedOrders(completedOrders)
+                .totalPlatformRevenue(totalRevenue)
+                .build();
+    }
 }

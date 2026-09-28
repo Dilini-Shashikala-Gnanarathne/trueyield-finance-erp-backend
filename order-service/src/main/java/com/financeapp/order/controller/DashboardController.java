@@ -43,4 +43,11 @@ public class DashboardController {
         com.financeapp.order.dto.dashboard.SalesSummaryDto summary = dashboardService.getFarmerSalesSummary(principal.getUserId());
         return ResponseEntity.ok(ApiResponse.ok("Farmer sales summary retrieved successfully", summary));
     }
+
+    @GetMapping("/admin/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<com.financeapp.order.dto.dashboard.OrderStatsDto>> getAdminOrderStats() {
+        com.financeapp.order.dto.dashboard.OrderStatsDto stats = dashboardService.getAdminOrderStats();
+        return ResponseEntity.ok(ApiResponse.ok("Admin order stats retrieved successfully", stats));
+    }
 }

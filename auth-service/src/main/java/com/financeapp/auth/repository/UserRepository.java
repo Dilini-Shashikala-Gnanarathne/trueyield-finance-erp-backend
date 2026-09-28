@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query("SELECT u FROM UserEntity u WHERE (u.phone = :identifier OR (u.email IS NOT NULL AND LOWER(u.email) = LOWER(:identifier))) AND u.deletedAt IS NULL")
     Optional<UserEntity> findByIdentifier(@Param("identifier") String identifier);
+
+    long countByRole(com.financeapp.auth.domain.enums.UserRole role);
 }
