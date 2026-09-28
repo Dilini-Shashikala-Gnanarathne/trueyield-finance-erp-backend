@@ -21,4 +21,14 @@ public interface OrderRepository extends JpaRepository<OrderEntity, String> {
     Page<OrderEntity> findByFarmerIdOrderByCreatedAtDesc(String farmerId, Pageable pageable);
 
     Page<OrderEntity> findByFarmerIdAndStatusOrderByCreatedAtDesc(String farmerId, OrderStatus status, Pageable pageable);
+
+    long countByFarmerIdAndStatus(String farmerId, OrderStatus status);
+
+    long countByBuyerIdAndStatus(String buyerId, OrderStatus status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM OrderEntity o WHERE o.farmerId = :farmerId AND o.status = :status")
+    java.math.BigDecimal sumTotalSalesByFarmerIdAndStatus(@org.springframework.data.repository.query.Param("farmerId") String farmerId, @org.springframework.data.repository.query.Param("status") OrderStatus status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM OrderEntity o WHERE o.buyerId = :buyerId AND o.status = :status")
+    java.math.BigDecimal sumTotalSpentByBuyerIdAndStatus(@org.springframework.data.repository.query.Param("buyerId") String buyerId, @org.springframework.data.repository.query.Param("status") OrderStatus status);
 }
