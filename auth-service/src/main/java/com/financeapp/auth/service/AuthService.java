@@ -210,4 +210,13 @@ public class AuthService {
                 .user(summary)
                 .build();
     }
+
+    @Transactional
+    public void updateUserStatus(String userId, UserStatus newStatus) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.financeapp.auth.exception.ResourceNotFoundException("User not found"));
+        user.setStatus(newStatus);
+        userRepository.save(user);
+        log.info("Admin updated user {} status to {}", userId, newStatus);
+    }
 }

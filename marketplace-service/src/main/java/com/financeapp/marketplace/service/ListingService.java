@@ -243,6 +243,20 @@ public class ListingService {
         return toListingResponse(cancelled, principal);
     }
 
+    @Transactional
+    public ListingResponse adminCancelListing(String listingId, String reason, SecurityPrincipal principal) {
+        ListingEntity listing = getListingOrThrow(listingId);
+        
+        String cancelReason = (reason != null && !reason.isBlank()) ? reason : "Cancelled by Admin due to policy violation";
+        listing.cancel(cancelReason);
+
+        ListingEntity cancelled = listingRepository.save(listing);
+        recordOutboxEvent("ListingCancelled", cancelled);
+
+        log.info("Admin cancelled listing: id={}, reason={}", cancelled.getId(), cancelReason);
+        return toListingResponse(cancelled, principal);
+    }
+
     /**
      * MARKET-007: Add image reference to listing (Object storage metadata).
      */
