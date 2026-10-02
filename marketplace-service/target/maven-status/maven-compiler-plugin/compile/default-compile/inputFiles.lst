@@ -1,4 +1,6 @@
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\client\AuthServiceClient.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\controller\AdminDashboardController.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\controller\AdminListingController.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\controller\ListingController.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\controller\ProduceController.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\domain\entity\ListingEntity.java
@@ -11,6 +13,7 @@ C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\domain\enums\QualityGrade.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\domain\enums\UserRole.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\dto\ApiResponse.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\dto\dashboard\ListingStatsDto.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\dto\listing\AddImageRequest.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\dto\listing\CancelListingRequest.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\marketplace-service\src\main\java\com\financeapp\marketplace\dto\listing\CreateListingRequest.java

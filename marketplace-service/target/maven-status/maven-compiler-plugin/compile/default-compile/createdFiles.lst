@@ -6,8 +6,10 @@ com\financeapp\marketplace\security\SecurityPrincipal.class
 com\financeapp\marketplace\domain\entity\MarketplaceOutboxEntity.class
 com\financeapp\marketplace\domain\entity\MarketplaceOutboxEntity$MarketplaceOutboxEntityBuilder.class
 com\financeapp\marketplace\dto\ApiResponse$ApiResponseBuilder.class
+com\financeapp\marketplace\controller\AdminListingController.class
 com\financeapp\marketplace\repository\ListingImageRepository.class
 com\financeapp\marketplace\domain\entity\ProduceEntity.class
+com\financeapp\marketplace\dto\dashboard\ListingStatsDto$ListingStatsDtoBuilder.class
 com\financeapp\marketplace\dto\listing\AddImageRequest$AddImageRequestBuilder.class
 com\financeapp\marketplace\dto\listing\ReserveStockRequest.class
 com\financeapp\marketplace\dto\produce\CreateProduceRequest$CreateProduceRequestBuilder.class
@@ -15,6 +17,7 @@ com\financeapp\marketplace\exception\GlobalExceptionHandler.class
 com\financeapp\marketplace\service\ProduceService.class
 com\financeapp\marketplace\dto\listing\ListingSummaryResponse.class
 com\financeapp\marketplace\dto\listing\ListingSummaryResponse$ListingSummaryResponseBuilder.class
+com\financeapp\marketplace\controller\AdminDashboardController.class
 com\financeapp\marketplace\repository\ProduceRepository.class
 com\financeapp\marketplace\dto\listing\ListingResponse$ListingResponseBuilder.class
 com\financeapp\marketplace\dto\listing\ListingResponse.class
@@ -41,6 +44,7 @@ com\financeapp\marketplace\dto\listing\ValidationResultResponse$ValidationResult
 com\financeapp\marketplace\dto\listing\StockOperationResponse$StockOperationResponseBuilder.class
 com\financeapp\marketplace\dto\listing\ReserveStockRequest$ReserveStockRequestBuilder.class
 com\financeapp\marketplace\security\JwtAuthenticationFilter.class
+com\financeapp\marketplace\dto\dashboard\ListingStatsDto.class
 com\financeapp\marketplace\dto\PageResponse$PageResponseBuilder.class
 com\financeapp\marketplace\dto\listing\StockOperationResponse.class
 com\financeapp\marketplace\service\ListingService.class

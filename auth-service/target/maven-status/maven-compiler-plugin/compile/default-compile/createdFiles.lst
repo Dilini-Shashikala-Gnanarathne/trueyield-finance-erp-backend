@@ -5,6 +5,8 @@ com\financeapp\auth\config\SecurityConfig.class
 com\financeapp\auth\dto\request\LoginRequest.class
 com\financeapp\auth\dto\response\FarmerProfileResponse.class
 com\financeapp\auth\repository\BuyerProfileRepository.class
+com\financeapp\auth\controller\AdminDashboardController.class
+com\financeapp\auth\dto\response\admin\UserStatsDto.class
 com\financeapp\auth\exception\BusinessException.class
 com\financeapp\auth\dto\response\FarmerProfileResponse$FarmerProfileResponseBuilder.class
 com\financeapp\auth\dto\response\ApiResponse.class
@@ -12,6 +14,7 @@ com\financeapp\auth\dto\response\BuyerProfileResponse$BuyerProfileResponseBuilde
 com\financeapp\auth\exception\AccountNotActiveException.class
 com\financeapp\auth\dto\response\SellerPublicProfileResponse$SellerPublicProfileResponseBuilder.class
 com\financeapp\auth\domain\enums\LocationVisibility.class
+com\financeapp\auth\dto\response\admin\UserStatsDto$UserStatsDtoBuilder.class
 com\financeapp\auth\service\ProfileService.class
 com\financeapp\auth\dto\response\AuthResponse$AuthResponseBuilder.class
 com\financeapp\auth\domain\entity\UserEntity$UserEntityBuilder.class
@@ -32,6 +35,7 @@ com\financeapp\auth\dto\request\UpdateFarmerProfileRequest.class
 com\financeapp\auth\dto\request\UpdateBuyerProfileRequest$UpdateBuyerProfileRequestBuilder.class
 com\financeapp\auth\AuthServiceApplication.class
 com\financeapp\auth\exception\GlobalExceptionHandler.class
+com\financeapp\auth\controller\AdminUserController.class
 com\financeapp\auth\exception\InvalidCredentialsException.class
 com\financeapp\auth\domain\enums\UserStatus.class
 com\financeapp\auth\security\SecurityPrincipal.class

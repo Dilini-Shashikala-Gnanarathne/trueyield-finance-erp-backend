@@ -1,6 +1,8 @@
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\AuthServiceApplication.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\config\JpaConfig.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\config\SecurityConfig.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\controller\AdminDashboardController.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\controller\AdminUserController.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\controller\AuthController.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\controller\ProfileController.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\domain\entity\BuyerProfileEntity.java
@@ -14,6 +16,7 @@ C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\fin
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\request\RegisterFarmerRequest.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\request\UpdateBuyerProfileRequest.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\request\UpdateFarmerProfileRequest.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\response\admin\UserStatsDto.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\response\ApiResponse.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\response\AuthResponse.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\auth-service\src\main\java\com\financeapp\auth\dto\response\BuyerProfileResponse.java
