@@ -123,7 +123,7 @@ public class ListingController {
     @PreAuthorize("hasRole('FARMER')")
     @Operation(summary = "Get authenticated farmer's own listings")
     public ResponseEntity<ApiResponse<List<ListingResponse>>> getFarmerListings(
-            @RequestParam(required = false) ListingStatus status,
+            @RequestParam(name = "status", required = false) ListingStatus status,
             @AuthenticationPrincipal SecurityPrincipal principal) {
         List<ListingResponse> listings = listingService.getFarmerListings(principal, status);
         return ResponseEntity.ok(ApiResponse.ok("Farmer listings retrieved.", listings));

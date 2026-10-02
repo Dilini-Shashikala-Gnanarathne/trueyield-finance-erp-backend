@@ -21,7 +21,7 @@ public class AdminListingController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ListingResponse>> adminCancelListing(
             @PathVariable String listingId,
-            @RequestParam(required = false) String reason,
+            @RequestParam(name = "reason", required = false) String reason,
             @AuthenticationPrincipal SecurityPrincipal principal) {
         
         ListingResponse response = listingService.adminCancelListing(listingId, reason, principal);
