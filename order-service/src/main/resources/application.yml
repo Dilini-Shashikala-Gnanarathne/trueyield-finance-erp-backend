@@ -41,7 +41,7 @@ marketplace:
 grpc:
   client:
     marketplace-service:
-      address: ${MARKETPLACE_GRPC_URL:'static://localhost:9091'}
+      address: ${MARKETPLACE_GRPC_URL:static://localhost:9091}
       negotiation-type: plaintext
 
 # Pricing parameters (PRICE-003)

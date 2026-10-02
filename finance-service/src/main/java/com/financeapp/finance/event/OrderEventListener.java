@@ -1,8 +1,8 @@
 package com.financeapp.finance.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.financeapp.finance.dto.CreateJournalEntryRequest;
-import com.financeapp.finance.service.JournalEntryService;
+import com.financeapp.finance.dto.CreateJournalEntryCommand;
+import com.financeapp.finance.service.JournalEntryApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class OrderEventListener {
 
-    private final JournalEntryService journalEntryService;
+    private final JournalEntryApplicationService journalEntryApplicationService;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "order.events", groupId = "finance-journal-group")
@@ -26,18 +26,18 @@ public class OrderEventListener {
                 // Auto-post settlement journal
                 // DEBIT Cash / CREDIT Revenue
                 
-                CreateJournalEntryRequest journalRequest = CreateJournalEntryRequest.builder()
+                CreateJournalEntryCommand journalRequest = CreateJournalEntryCommand.builder()
                         .reference("ORD-" + event.getOrderId())
                         .description("Settlement for order " + event.getOrderId())
                         .debitAccount("CASH")
                         .creditAccount("REVENUE")
-                        .amount(event.getTotalAmount().toString())
+                        .amount(event.getTotalAmount())
                         .currency("LKR")
                         .sourceSystem("order-service")
-                        .entryType(com.financeapp.finance.grpc.proto.JournalEntryType.GENERAL_LEDGER)
+                        .entryType("GENERAL_LEDGER")
                         .build();
                         
-                journalEntryService.createEntry(journalRequest);
+                journalEntryApplicationService.createJournalEntry(journalRequest);
                 log.info("Auto-posted journal entry for paid/completed order: {}", event.getOrderId());
             }
 
