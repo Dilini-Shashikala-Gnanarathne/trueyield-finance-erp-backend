@@ -60,6 +60,15 @@ management:
     health:
       show-details: always
 
+# Kafka Configuration
+spring.kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  consumer:
+    group-id: finance-journal-group
+    auto-offset-reset: earliest
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 logging:
   level:
     com.financeapp.finance: DEBUG

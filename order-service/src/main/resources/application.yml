@@ -37,10 +37,24 @@ marketplace:
   service:
     url: ${MARKETPLACE_SERVICE_URL:http://localhost:8086}
 
+# gRPC Clients
+grpc:
+  client:
+    marketplace-service:
+      address: ${MARKETPLACE_GRPC_URL:'static://localhost:9091'}
+      negotiation-type: plaintext
+
 # Pricing parameters (PRICE-003)
 pricing:
   platform-fee-percentage: ${PLATFORM_FEE_PERCENT:5.00}
   currency: "LKR"
+
+# Kafka Configuration
+spring.kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 # Swagger / OpenAPI
 springdoc:
