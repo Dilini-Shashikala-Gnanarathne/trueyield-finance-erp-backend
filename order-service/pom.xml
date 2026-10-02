@@ -90,6 +90,25 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- gRPC Client (calls marketplace-service internally) -->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>${grpc-spring-boot.version}</version>
+        </dependency>
+
+        <!-- Shared proto stubs (marketplace.proto generated classes) -->
+        <dependency>
+            <groupId>com.financeapp</groupId>
+            <artifactId>proto</artifactId>
+        </dependency>
+
+        <!-- Kafka (Outbox relay producer) -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

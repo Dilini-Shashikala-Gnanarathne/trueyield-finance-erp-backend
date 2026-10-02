@@ -23,31 +23,7 @@ spring:
       # ============================================================
       routes:
 
-        # ------------------------------------------------------------
-        # Payroll Service
-        # ------------------------------------------------------------
-        - id: payroll-service-route
-          uri: ${PAYROLL_SERVICE_URL:http://localhost:8081}
 
-          predicates:
-            - Path=/api/payroll/**
-
-          filters:
-            # Correlation ID
-            - AddRequestHeader=X-Correlation-Id, generated
-
-            # Circuit breaker ONLY for Payroll
-            - name: CircuitBreaker
-              args:
-                name: payrollCircuitBreaker
-                fallbackUri: forward:/gateway/fallback
-
-          metadata:
-            connect-timeout: 5000
-            response-timeout: 30000
-
-        # ------------------------------------------------------------
-        # ------------------------------------------------------------
         # Auth Service
         # ------------------------------------------------------------
         - id: auth-service-route
@@ -168,12 +144,6 @@ resilience4j:
     instances:
 
       # ------------------------------------------------------------
-      # Payroll Circuit Breaker
-      # ------------------------------------------------------------
-      payrollCircuitBreaker:
-        base-config: default
-
-      # ------------------------------------------------------------
       # Finance Circuit Breaker
       # ------------------------------------------------------------
       financeCircuitBreaker:
@@ -189,9 +159,6 @@ resilience4j:
         cancel-running-future: true
 
     instances:
-
-      payrollCircuitBreaker:
-        base-config: default
 
       financeCircuitBreaker:
         base-config: default

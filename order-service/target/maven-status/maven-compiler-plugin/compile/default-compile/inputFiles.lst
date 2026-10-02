@@ -10,6 +10,9 @@ C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\fi
 C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\ApiResponse.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\dashboard\BuyerDashboardDto.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\dashboard\FarmerDashboardDto.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\dashboard\OrderStatsDto.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\dashboard\ProduceSalesDto.java
+C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\dashboard\SalesSummaryDto.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\order\CalculatePriceRequest.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\order\CreateOrderRequest.java
 C:\Users\SHASHI\trueyield-finance-erp-backend\order-service\src\main\java\com\financeapp\order\dto\order\OrderResponse.java

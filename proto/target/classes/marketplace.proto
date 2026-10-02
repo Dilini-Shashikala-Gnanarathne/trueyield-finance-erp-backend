@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package marketplace;
+
+option java_package = "com.financeapp.marketplace.grpc.proto";
+option java_outer_classname = "MarketplaceProto";
+option java_multiple_files = true;
+
+// ============================================================
+// Marketplace Service gRPC Contract
+//
+// Used internally by order-service to:
+//   1. Fetch listing info + price (replaces REST GET /api/v1/listings/{id})
+//   2. Reserve stock atomically  (replaces REST POST /reserve)
+//   3. Release stock atomically  (replaces REST POST /release)
+//
+// All monetary amounts as string BigDecimal for precision.
+// ============================================================
+
+service MarketplaceService {
+
+    // Fetch listing details, availability, and price for a given listing.
+    rpc GetListing (GetListingRequest) returns (GetListingResponse);
+
+    // Atomically reserve stock for an order. Idempotent on orderId.
+    rpc ReserveStock (ReserveStockRequest) returns (ReserveStockResponse);
+
+    // Release previously reserved stock (on order rejection/cancellation).
+    rpc ReleaseStock (ReleaseStockRequest) returns (ReleaseStockResponse);
+
+    // Health check
+    rpc CheckHealth (MarketplaceHealthRequest) returns (MarketplaceHealthResponse);
+}
+
+// ── GetListing ────────────────────────────────────────────────────────────────
+
+message GetListingRequest {
+    string listing_id = 1;
+}
+
+message GetListingResponse {
+    string listing_id         = 1;
+    string farmer_id          = 2;
+    string produce_name       = 3;
+    string title              = 4;
+    string status             = 5;  // DRAFT | ACTIVE | SOLD_OUT | CANCELLED | EXPIRED
+    string available_quantity = 6;  // BigDecimal as string
+    string min_order_quantity = 7;  // BigDecimal as string, empty if not set
+    string unit               = 8;
+    string price_per_unit     = 9;  // BigDecimal as string
+    string currency           = 10;
+}
+
+// ── ReserveStock ─────────────────────────────────────────────────────────────
+
+message ReserveStockRequest {
+    string listing_id = 1;
+    string quantity   = 2;  // BigDecimal as string
+    string order_id   = 3;  // Idempotency key
+}
+
+message ReserveStockResponse {
+    bool   success                     = 1;
+    string message                     = 2;
+    string remaining_available_quantity = 3;  // BigDecimal as string
+    string listing_status              = 4;
+}
+
+// ── ReleaseStock ─────────────────────────────────────────────────────────────
+
+message ReleaseStockRequest {
+    string listing_id = 1;
+    string quantity   = 2;  // BigDecimal as string
+    string order_id   = 3;
+}
+
+message ReleaseStockResponse {
+    bool   success        = 1;
+    string message        = 2;
+    string listing_status = 3;
+}
+
+// ── Health ────────────────────────────────────────────────────────────────────
+
+message MarketplaceHealthRequest {
+    string service = 1;
+}
+
+message MarketplaceHealthResponse {
+    string status  = 1;
+    string version = 2;
+}

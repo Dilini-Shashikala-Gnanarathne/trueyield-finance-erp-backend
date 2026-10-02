@@ -86,6 +86,25 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- gRPC Server (serves order-service internal calls) -->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>${grpc-spring-boot.version}</version>
+        </dependency>
+
+        <!-- Shared proto stubs (marketplace.proto generated classes) -->
+        <dependency>
+            <groupId>com.financeapp</groupId>
+            <artifactId>proto</artifactId>
+        </dependency>
+
+        <!-- Kafka (Outbox relay + consume order.events) -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <!-- Lombok & MapStruct -->
         <dependency>
             <groupId>org.projectlombok</groupId>

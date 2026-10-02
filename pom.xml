@@ -13,18 +13,14 @@
 
     <name>REST + gRPC Finance ERP</name>
     <description>
-        Demonstration project: REST at the Edge, gRPC Inside.
-        A realistic Finance ERP payroll-to-journal workflow showing when and why
-        to use REST for external APIs and gRPC for internal service communication.
+        Finance ERP microservices: REST at the Edge, gRPC Inside.
+        Includes auth, marketplace, finance journal, and API gateway.
     </description>
 
     <modules>
         <module>proto</module>
         <module>api-gateway</module>
-        <module>payroll-service</module>
         <module>finance-service</module>
-        <module>notification-service</module>
-        <module>payslip-service</module>
         <module>auth-service</module>
         <module>marketplace-service</module>
         <module>order-service</module>

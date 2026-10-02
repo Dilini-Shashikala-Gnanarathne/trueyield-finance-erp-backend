@@ -1,5 +1,0 @@
-com\financeapp\payroll\service\PayrollServiceTest$ProcessPayrollViaRest.class
-com\financeapp\payroll\integration\PayrollIntegrationTest.class
-com\financeapp\payroll\service\PayrollServiceTest.class
-com\financeapp\payroll\service\PayrollServiceTest$ProcessPayrollViaGrpc.class
-com\financeapp\payroll\controller\PayrollControllerTest.class
