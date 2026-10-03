@@ -46,6 +46,7 @@ import java.math.BigDecimal;
 public class JournalEntryApplicationService {
 
     private final JournalEntryRepository journalEntryRepository;
+    private final FinancialAuditService financialAuditService;
 
     /**
      * Create a journal entry, or return the existing one if the reference already exists.
@@ -79,6 +80,11 @@ public class JournalEntryApplicationService {
 
         try {
             JournalEntryEntity saved = journalEntryRepository.save(entry);
+            financialAuditService.recordEntryAudit(
+                    saved,
+                    "CREATED",
+                    command.getSourceSystem() != null ? command.getSourceSystem() : "SYSTEM"
+            );
             log.info("Journal entry created successfully. reference={}, id={}, amount={}",
                     saved.getReference(), saved.getId(), saved.getTotalAmount());
             return buildResult(saved, false, "Journal entry created successfully");

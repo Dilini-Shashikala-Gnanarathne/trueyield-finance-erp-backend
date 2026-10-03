@@ -27,6 +27,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final com.financeapp.auth.service.TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -42,7 +43,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7).trim();
         try {
             Claims claims = jwtUtil.validateAndGetClaims(token);
+
+            // Check if token has been revoked
+            if (tokenBlacklistService.isTokenBlacklisted(claims.getId())) {
+                log.warn("Rejected blacklisted JWT token: jti={}", claims.getId());
+                SecurityContextHolder.clearContext();
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token has been revoked");
+                return;
+            }
+
             SecurityPrincipal principal = jwtUtil.toPrincipal(claims);
+
+            // Check if user has been suspended in real time
+            if (tokenBlacklistService.isUserSuspended(principal.getUserId())) {
+                log.warn("Rejected request from suspended user: userId={}", principal.getUserId());
+                SecurityContextHolder.clearContext();
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Account has been suspended");
+                return;
+            }
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());

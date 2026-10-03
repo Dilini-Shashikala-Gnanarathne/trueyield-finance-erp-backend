@@ -52,6 +52,9 @@ class AuthServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private com.financeapp.auth.service.TokenBlacklistService tokenBlacklistService;
+
     @InjectMocks
     private AuthService authService;
 

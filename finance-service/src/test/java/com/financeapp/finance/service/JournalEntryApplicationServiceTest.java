@@ -40,6 +40,9 @@ class JournalEntryApplicationServiceTest {
     @Mock
     private JournalEntryRepository journalEntryRepository;
 
+    @Mock
+    private FinancialAuditService financialAuditService;
+
     @InjectMocks
     private JournalEntryApplicationService journalEntryApplicationService;
 

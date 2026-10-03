@@ -59,6 +59,17 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Login successful", response));
     }
 
+    /**
+     * AUTH-007: Logout.
+     */
+    @PostMapping("/logout")
+    @Operation(summary = "User Logout", description = "Invalidates the current session token in Redis blacklist")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        authService.logout(authHeader);
+        return ResponseEntity.ok(ApiResponse.ok("Logged out successfully", null));
+    }
+
     // =========================================================================
     // AUTH-004: RBAC Role Verification Endpoints
     // =========================================================================

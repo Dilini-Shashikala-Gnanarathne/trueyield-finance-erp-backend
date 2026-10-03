@@ -38,6 +38,7 @@ public class AuthService {
     private final BuyerProfileRepository buyerProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     /**
      * AUTH-001: Register Farmer account.
@@ -211,12 +212,30 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * AUTH-007: Invalidate user session on logout via Redis token blacklist.
+     */
+    public void logout(String authHeader) {
+        if (!StringUtils.hasText(authHeader) || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        String token = authHeader.substring(7).trim();
+        try {
+            io.jsonwebtoken.Claims claims = jwtUtil.validateAndGetClaims(token);
+            tokenBlacklistService.blacklistToken(claims);
+            log.info("User logged out successfully, token invalidated: jti={}", claims.getId());
+        } catch (Exception ex) {
+            log.warn("Failed to blacklist token during logout: {}", ex.getMessage());
+        }
+    }
+
     @Transactional
     public void updateUserStatus(String userId, UserStatus newStatus) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new com.financeapp.auth.exception.ResourceNotFoundException("User not found"));
         user.setStatus(newStatus);
         userRepository.save(user);
+        tokenBlacklistService.setUserStatus(userId, newStatus.name());
         log.info("Admin updated user {} status to {}", userId, newStatus);
     }
 
