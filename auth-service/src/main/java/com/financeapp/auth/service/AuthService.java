@@ -47,7 +47,7 @@ public class AuthService {
         String phone = normalizePhone(request.getPhone());
         String email = normalizeEmail(request.getEmail());
 
-        log.info("Processing farmer registration for phone: {}", phone);
+        log.info("Processing farmer registration for phone: {}", maskIdentifier(phone));
 
         validateUniqueness(phone, email);
 
@@ -84,7 +84,7 @@ public class AuthService {
         profile = farmerProfileRepository.save(profile);
         user.setFarmerProfile(profile);
 
-        log.info("Farmer account created successfully: userId={}, phone={}", userId, phone);
+        log.info("Farmer account created successfully: userId={}, phone={}", userId, maskIdentifier(phone));
 
         return buildAuthResponse(user);
     }
@@ -97,7 +97,7 @@ public class AuthService {
         String phone = normalizePhone(request.getPhone());
         String email = normalizeEmail(request.getEmail());
 
-        log.info("Processing buyer registration for phone: {}", phone);
+        log.info("Processing buyer registration for phone: {}", maskIdentifier(phone));
 
         validateUniqueness(phone, email);
 
@@ -131,7 +131,7 @@ public class AuthService {
         profile = buyerProfileRepository.save(profile);
         user.setBuyerProfile(profile);
 
-        log.info("Buyer account created successfully: userId={}, phone={}", userId, phone);
+        log.info("Buyer account created successfully: userId={}, phone={}", userId, maskIdentifier(phone));
 
         return buildAuthResponse(user);
     }
@@ -142,7 +142,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         String identifier = request.getIdentifier().trim();
-        log.info("Authenticating login request for identifier: {}", identifier);
+        log.info("Authenticating login request for identifier: {}", maskIdentifier(identifier));
 
         UserEntity user = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid phone/email or password"));
@@ -218,5 +218,17 @@ public class AuthService {
         user.setStatus(newStatus);
         userRepository.save(user);
         log.info("Admin updated user {} status to {}", userId, newStatus);
+    }
+
+    private String maskIdentifier(String input) {
+        if (!StringUtils.hasText(input)) return "***";
+        int len = input.length();
+        if (len <= 4) return "****";
+        if (input.contains("@")) {
+            int atIndex = input.indexOf('@');
+            if (atIndex <= 2) return "***@" + input.substring(atIndex + 1);
+            return input.substring(0, 2) + "***@" + input.substring(atIndex + 1);
+        }
+        return input.substring(0, 3) + "****" + input.substring(len - 2);
     }
 }

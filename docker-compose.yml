@@ -40,3 +40,9 @@ services:
     build:
       context: ./backend
       dockerfile: api-gateway/Dockerfile
+
+  order-service:
+    build:
+      context: ./backend
+      dockerfile: order-service/Dockerfile
+

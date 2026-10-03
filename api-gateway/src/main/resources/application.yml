@@ -14,9 +14,18 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowed-origins: "*"
-            allowed-methods: "*"
+            allowed-origins:
+              - ${FRONTEND_URL:http://localhost:5173}
+              - "http://localhost:3000"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
             allowed-headers: "*"
+            allow-credentials: true
 
       # ============================================================
       # ROUTES
@@ -56,6 +65,22 @@ spring:
             response-timeout: 30000
 
         # ------------------------------------------------------------
+        # Order Service
+        # ------------------------------------------------------------
+        - id: order-service-route
+          uri: ${ORDER_SERVICE_URL:http://localhost:8087}
+
+          predicates:
+            - Path=/api/v1/orders/**,/api/orders/**
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
         # Finance Service REST
         # ------------------------------------------------------------
         - id: finance-service-rest-route
@@ -86,20 +111,20 @@ spring:
 
 
 # ================================================================
-# ACTUATOR
+# ACTUATOR (Hardened for Production)
 # ================================================================
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway,metrics,prometheus
+        include: health,info
 
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
 
     gateway:
-      enabled: true
+      enabled: false
 
 
 # ================================================================
