@@ -48,7 +48,10 @@ grpc:
   server:
     port: ${GRPC_PORT:9090}
     # Use plaintext for development. Configure TLS/mTLS in production.
-    # See README section on "Security" for production configuration guidance.
+# JWT Configuration (Validates tokens issued by auth-service)
+jwt:
+  public-key: ${JWT_PUBLIC_KEY:}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public_key.pem}
 
 # Actuator
 management:
