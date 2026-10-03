@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -24,14 +25,21 @@ import java.util.UUID;
 
 /**
  * JWT utility using RS256 (RSA Private/Public key pair).
+ * Supports externalized private/public keys via environment variables or file/classpath resources.
  * Embeds user identity, full name, phone, email, and role claims.
  */
 @Component
 @Slf4j
 public class JwtUtil {
 
+    @Value("${jwt.private-key:}")
+    private String privateKeyContent;
+
     @Value("${jwt.private-key-path:classpath:keys/private_key.pem}")
     private Resource privateKeyResource;
+
+    @Value("${jwt.public-key:}")
+    private String publicKeyContent;
 
     @Value("${jwt.public-key-path:classpath:keys/public_key.pem}")
     private Resource publicKeyResource;
@@ -44,8 +52,8 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() throws Exception {
-        this.privateKey = loadPrivateKey(privateKeyResource);
-        this.publicKey = loadPublicKey(publicKeyResource);
+        this.privateKey = loadPrivateKey();
+        this.publicKey = loadPublicKey();
         log.info("JWT RSA256 keys loaded successfully.");
     }
 
@@ -95,27 +103,54 @@ public class JwtUtil {
         return new SecurityPrincipal(userId, fullName, phone, email, role);
     }
 
-    private PrivateKey loadPrivateKey(Resource resource) throws Exception {
-        String pem = readPem(resource)
+    private PrivateKey loadPrivateKey() throws Exception {
+        String pem = StringUtils.hasText(privateKeyContent) ? privateKeyContent : readResource(privateKeyResource);
+        return parsePrivateKey(pem);
+    }
+
+    private PublicKey loadPublicKey() throws Exception {
+        String pem = StringUtils.hasText(publicKeyContent) ? publicKeyContent : readResource(publicKeyResource);
+        return parsePublicKey(pem);
+    }
+
+    private PrivateKey parsePrivateKey(String pemOrBase64) throws Exception {
+        String pem = pemOrBase64.trim();
+        if (!pem.contains("-----BEGIN")) {
+            try {
+                pem = new String(Base64.getDecoder().decode(pem), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        String clean = pem
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s+", "");
-        byte[] decoded = Base64.getDecoder().decode(pem);
+        byte[] decoded = Base64.getDecoder().decode(clean);
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decoded);
         return KeyFactory.getInstance("RSA").generatePrivate(spec);
     }
 
-    private PublicKey loadPublicKey(Resource resource) throws Exception {
-        String pem = readPem(resource)
+    private PublicKey parsePublicKey(String pemOrBase64) throws Exception {
+        String pem = pemOrBase64.trim();
+        if (!pem.contains("-----BEGIN")) {
+            try {
+                pem = new String(Base64.getDecoder().decode(pem), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        String clean = pem
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s+", "");
-        byte[] decoded = Base64.getDecoder().decode(pem);
+        byte[] decoded = Base64.getDecoder().decode(clean);
         X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
         return KeyFactory.getInstance("RSA").generatePublic(spec);
     }
 
-    private String readPem(Resource resource) throws Exception {
+    private String readResource(Resource resource) throws Exception {
+        if (resource == null || !resource.exists()) {
+            throw new IllegalStateException("JWT key resource does not exist: " + resource);
+        }
         try (InputStream is = resource.getInputStream()) {
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }

@@ -35,7 +35,8 @@ grpc:
 
 # JWT Configuration (Validates tokens issued by auth-service)
 jwt:
-  public-key-path: classpath:keys/public_key.pem
+  public-key: ${JWT_PUBLIC_KEY:}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public_key.pem}
 
 # Kafka Configuration
 spring.kafka:

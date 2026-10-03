@@ -43,3 +43,14 @@ buildNumber.properties
 .settings/
 .classpath
 .project
+
+# Environment & Secret files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.jks
+keys/
+

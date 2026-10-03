@@ -39,10 +39,12 @@ server:
 
 # JWT RS256 Configuration
 jwt:
-  private-key-path: classpath:keys/private_key.pem
-  public-key-path: classpath:keys/public_key.pem
-  access-token-expiry-ms: 86400000     # 24 hours
-  refresh-token-expiry-ms: 604800000   # 7 days
+  private-key: ${JWT_PRIVATE_KEY:}
+  private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:keys/private_key.pem}
+  public-key: ${JWT_PUBLIC_KEY:}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public_key.pem}
+  access-token-expiry-ms: ${JWT_ACCESS_TOKEN_EXPIRY_MS:86400000}     # 24 hours (Recommend reducing to 900000 / 15m in production)
+  refresh-token-expiry-ms: ${JWT_REFRESH_TOKEN_EXPIRY_MS:604800000}   # 7 days
 
 # Swagger / OpenAPI
 springdoc:

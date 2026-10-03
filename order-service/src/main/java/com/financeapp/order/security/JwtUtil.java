@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +22,9 @@ import java.util.Base64;
 @Slf4j
 public class JwtUtil {
 
+    @Value("${jwt.public-key:}")
+    private String publicKeyContent;
+
     @Value("${jwt.public-key-path:classpath:keys/public_key.pem}")
     private Resource publicKeyResource;
 
@@ -28,7 +32,7 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() throws Exception {
-        this.publicKey = loadPublicKey(publicKeyResource);
+        this.publicKey = loadPublicKey();
         log.info("Order Service JWT RSA256 public key loaded successfully.");
     }
 
@@ -65,15 +69,34 @@ public class JwtUtil {
         return new SecurityPrincipal(userId, fullName, phone, email, role);
     }
 
-    private PublicKey loadPublicKey(Resource resource) throws Exception {
+    private PublicKey loadPublicKey() throws Exception {
+        String pem = StringUtils.hasText(publicKeyContent) ? publicKeyContent : readResource(publicKeyResource);
+        return parsePublicKey(pem);
+    }
+
+    private PublicKey parsePublicKey(String pemOrBase64) throws Exception {
+        String pem = pemOrBase64.trim();
+        if (!pem.contains("-----BEGIN")) {
+            try {
+                pem = new String(Base64.getDecoder().decode(pem), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        String clean = pem
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s+", "");
+        byte[] decoded = Base64.getDecoder().decode(clean);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePublic(new X509EncodedKeySpec(decoded));
+    }
+
+    private String readResource(Resource resource) throws Exception {
+        if (resource == null || !resource.exists()) {
+            throw new IllegalStateException("JWT public key resource does not exist: " + resource);
+        }
         try (InputStream is = resource.getInputStream()) {
-            String key = new String(is.readAllBytes(), StandardCharsets.UTF_8)
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s+", "");
-            byte[] decoded = Base64.getDecoder().decode(key);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePublic(new X509EncodedKeySpec(decoded));
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 }
