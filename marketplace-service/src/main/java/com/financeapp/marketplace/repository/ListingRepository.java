@@ -45,4 +45,16 @@ public interface ListingRepository extends JpaRepository<ListingEntity, String>,
     int updateStatus(@Param("id") String id, @Param("newStatus") ListingStatus newStatus);
 
     long countByStatus(ListingStatus status);
+
+    /**
+     * Admin: paginated listing list with optional status and farmerId filters.
+     */
+    @Query("SELECT l FROM ListingEntity l WHERE " +
+           "(:status IS NULL OR l.status = :status) AND " +
+           "(:farmerId IS NULL OR l.farmerId = :farmerId) " +
+           "ORDER BY l.createdAt DESC")
+    org.springframework.data.domain.Page<ListingEntity> adminFindAll(
+            @Param("status")   ListingStatus status,
+            @Param("farmerId") String farmerId,
+            org.springframework.data.domain.Pageable pageable);
 }

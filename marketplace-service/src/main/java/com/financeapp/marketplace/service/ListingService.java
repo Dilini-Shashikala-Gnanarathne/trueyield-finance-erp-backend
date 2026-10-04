@@ -258,6 +258,28 @@ public class ListingService {
     }
 
     /**
+     * ADMIN: Paginated listing list — all statuses, optional filters by status and farmerId.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<ListingSummaryResponse> adminListListings(
+            ListingStatus status, String farmerId,
+            int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<ListingEntity> result = listingRepository.adminFindAll(status, farmerId, pageable);
+        return PageResponse.from(result.map(this::toSummaryResponse));
+    }
+
+    /**
+     * ADMIN: Get any single listing by ID regardless of status.
+     */
+    @Transactional(readOnly = true)
+    public ListingResponse adminGetListing(String listingId, SecurityPrincipal principal) {
+        ListingEntity listing = getListingOrThrow(listingId);
+        return toListingResponse(listing, principal);   // principal is ADMIN → no location fuzzing
+    }
+
+    /**
      * MARKET-007: Add image reference to listing (Object storage metadata).
      */
     @Transactional
