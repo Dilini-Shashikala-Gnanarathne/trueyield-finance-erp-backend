@@ -90,7 +90,8 @@ public class JournalEntryApplicationService {
     public JournalEntryResult createOrderSettlementJournal(String reference, String description,
                                                            BigDecimal total, BigDecimal platformFee,
                                                            BigDecimal deliveryFee, String currency,
-                                                           String sourceSystem) {
+                                                           String sourceSystem, String orderId,
+                                                           String farmerId, String buyerId) {
         return journalEntryRepository.findByReference(reference)
                 .map(existing -> buildResult(existing, true, "Journal entry already exists - idempotent return"))
                 .orElseGet(() -> {
@@ -114,6 +115,9 @@ public class JournalEntryApplicationService {
                     entry.setStatus(JournalEntryStatus.CREATED);
                     entry.setSourceSystem(sourceSystem != null ? sourceSystem : "UNKNOWN");
                     entry.setEntryType(JournalEntryType.GENERAL_LEDGER);
+                    entry.setOrderId(orderId);
+                    entry.setFarmerId(farmerId);
+                    entry.setBuyerId(buyerId);
 
                     entry.addLine(buildLine(JournalEntryLineEntity.LineType.DEBIT, "CASH", total, description));
                     if (farmerShare.compareTo(BigDecimal.ZERO) > 0) {

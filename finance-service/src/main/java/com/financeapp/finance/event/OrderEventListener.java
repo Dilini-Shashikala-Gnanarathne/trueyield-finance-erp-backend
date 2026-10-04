@@ -41,7 +41,10 @@ public class OrderEventListener {
                 event.getPlatformFee(),
                 event.getDeliveryFee(),
                 event.getCurrency() != null ? event.getCurrency() : "LKR",
-                "order-service");
+                "order-service",
+                event.getOrderId(),
+                event.getFarmerId(),
+                event.getBuyerId());
         log.info("Auto-posted settlement journal for paid order: {}", event.getOrderId());
     }
 }

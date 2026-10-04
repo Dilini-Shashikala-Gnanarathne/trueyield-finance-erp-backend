@@ -81,6 +81,70 @@ spring:
             response-timeout: 30000
 
         # ------------------------------------------------------------
+        # Dashboard – Farmer / Buyer (Order Service)
+        # ------------------------------------------------------------
+        - id: dashboard-order-route
+          uri: ${ORDER_SERVICE_URL:http://localhost:8087}
+
+          predicates:
+            - Path=/api/v1/dashboard/**
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
+        # Admin – User management (Auth Service)
+        # ------------------------------------------------------------
+        - id: admin-auth-users-route
+          uri: ${AUTH_SERVICE_URL:${USER_SERVICE_URL:http://localhost:8085}}
+
+          predicates:
+            - Path=/api/v1/admin/users/**,/api/v1/admin/dashboard/users
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
+        # Admin – Listing management + listing stats (Marketplace Service)
+        # ------------------------------------------------------------
+        - id: admin-marketplace-route
+          uri: ${MARKETPLACE_SERVICE_URL:http://localhost:8086}
+
+          predicates:
+            - Path=/api/v1/admin/listings/**,/api/v1/admin/dashboard/listings
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
+        # Admin – Order stats (Order Service)
+        # ------------------------------------------------------------
+        - id: admin-order-stats-route
+          uri: ${ORDER_SERVICE_URL:http://localhost:8087}
+
+          predicates:
+            - Path=/api/v1/dashboard/admin/stats
+
+          filters:
+            - AddRequestHeader=X-Correlation-Id, generated
+
+          metadata:
+            connect-timeout: 5000
+            response-timeout: 30000
+
+        # ------------------------------------------------------------
         # Finance Service REST
         # ------------------------------------------------------------
         - id: finance-service-rest-route

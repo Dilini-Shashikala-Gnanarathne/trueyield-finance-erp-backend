@@ -106,6 +106,18 @@ public class JournalEntryEntity {
     @Column(name = "source_system", nullable = false, length = 100)
     private String sourceSystem;
 
+    /** Originating marketplace order (null for non-order entries). */
+    @Column(name = "order_id", length = 36)
+    private String orderId;
+
+    /** Farmer party of the order, used for farmer statements. */
+    @Column(name = "farmer_id", length = 36)
+    private String farmerId;
+
+    /** Buyer party of the order, used for buyer statements. */
+    @Column(name = "buyer_id", length = 36)
+    private String buyerId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
