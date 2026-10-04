@@ -239,6 +239,44 @@ public class AuthService {
         log.info("Admin updated user {} status to {}", userId, newStatus);
     }
 
+    /**
+     * ADMIN: Paginated user list with optional role / status filters.
+     */
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<UserSummary> listUsers(
+            UserRole role, UserStatus status,
+            org.springframework.data.domain.Pageable pageable) {
+
+        return userRepository.findAllByFilters(role, status, pageable)
+                .map(u -> UserSummary.builder()
+                        .id(u.getId())
+                        .fullName(u.getFullName())
+                        .phone(u.getPhone())
+                        .email(u.getEmail())
+                        .role(u.getRole())
+                        .status(u.getStatus())
+                        .registeredAt(u.getRegisteredAt())
+                        .build());
+    }
+
+    /**
+     * ADMIN: Get a single user by ID.
+     */
+    @Transactional(readOnly = true)
+    public UserSummary getUserById(String userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.financeapp.auth.exception.ResourceNotFoundException("User not found: " + userId));
+        return UserSummary.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .status(user.getStatus())
+                .registeredAt(user.getRegisteredAt())
+                .build();
+    }
+
     private String maskIdentifier(String input) {
         if (!StringUtils.hasText(input)) return "***";
         int len = input.length();
