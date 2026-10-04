@@ -73,6 +73,88 @@ public class JournalEntryApplicationService {
                 .orElseGet(() -> createNewJournalEntry(command));
     }
 
+    /**
+     * Posts the multi-line settlement journal for a paid marketplace order.
+     *
+     * <pre>
+     *   DEBIT:   CASH                    total          (buyer payment received)
+     *   CREDIT:  FARMER_PAYABLE          total - fees   (owed to the farmer)
+     *   CREDIT:  PLATFORM_FEE_REVENUE    platformFee    (platform income)
+     *   CREDIT:  DELIVERY_FEE_REVENUE    deliveryFee    (only when > 0)
+     * </pre>
+     *
+     * Idempotent on {@code reference}, like {@link #createJournalEntry}.
+     * The farmer payable is derived as total - platformFee - deliveryFee so the entry always balances.
+     */
+    @Transactional
+    public JournalEntryResult createOrderSettlementJournal(String reference, String description,
+                                                           BigDecimal total, BigDecimal platformFee,
+                                                           BigDecimal deliveryFee, String currency,
+                                                           String sourceSystem) {
+        return journalEntryRepository.findByReference(reference)
+                .map(existing -> buildResult(existing, true, "Journal entry already exists - idempotent return"))
+                .orElseGet(() -> {
+                    BigDecimal fee = platformFee != null ? platformFee : BigDecimal.ZERO;
+                    BigDecimal delivery = deliveryFee != null ? deliveryFee : BigDecimal.ZERO;
+                    BigDecimal farmerShare = total.subtract(fee).subtract(delivery);
+
+                    if (total.compareTo(BigDecimal.ZERO) <= 0 || farmerShare.compareTo(BigDecimal.ZERO) < 0) {
+                        throw new IllegalArgumentException("Invalid settlement amounts for " + reference
+                                + ": total=" + total + ", platformFee=" + fee + ", deliveryFee=" + delivery);
+                    }
+                    if (currency == null || currency.length() != 3) {
+                        throw new IllegalArgumentException("Currency must be a valid ISO 4217 3-letter code, got: " + currency);
+                    }
+
+                    JournalEntryEntity entry = new JournalEntryEntity();
+                    entry.setReference(reference);
+                    entry.setDescription(description);
+                    entry.setCurrency(currency);
+                    entry.setTotalAmount(total);
+                    entry.setStatus(JournalEntryStatus.CREATED);
+                    entry.setSourceSystem(sourceSystem != null ? sourceSystem : "UNKNOWN");
+                    entry.setEntryType(JournalEntryType.GENERAL_LEDGER);
+
+                    entry.addLine(buildLine(JournalEntryLineEntity.LineType.DEBIT, "CASH", total, description));
+                    if (farmerShare.compareTo(BigDecimal.ZERO) > 0) {
+                        entry.addLine(buildLine(JournalEntryLineEntity.LineType.CREDIT, "FARMER_PAYABLE", farmerShare, description));
+                    }
+                    if (fee.compareTo(BigDecimal.ZERO) > 0) {
+                        entry.addLine(buildLine(JournalEntryLineEntity.LineType.CREDIT, "PLATFORM_FEE_REVENUE", fee, description));
+                    }
+                    if (delivery.compareTo(BigDecimal.ZERO) > 0) {
+                        entry.addLine(buildLine(JournalEntryLineEntity.LineType.CREDIT, "DELIVERY_FEE_REVENUE", delivery, description));
+                    }
+
+                    try {
+                        JournalEntryEntity saved = journalEntryRepository.save(entry);
+                        financialAuditService.recordEntryAudit(saved, "CREATED",
+                                sourceSystem != null ? sourceSystem : "SYSTEM");
+                        log.info("Settlement journal created. reference={}, id={}, total={}",
+                                saved.getReference(), saved.getId(), saved.getTotalAmount());
+                        return buildResult(saved, false, "Settlement journal created successfully");
+                    } catch (DataIntegrityViolationException e) {
+                        log.warn("Concurrent idempotency on settlement journal. reference={}", reference);
+                        return journalEntryRepository.findByReference(reference)
+                                .map(existing -> buildResult(existing, true,
+                                        "Journal entry created by concurrent request - idempotent return"))
+                                .orElseThrow(() -> new IllegalStateException(
+                                        "Journal entry reference constraint violation but entry not found: " + reference));
+                    }
+                });
+    }
+
+    private JournalEntryLineEntity buildLine(JournalEntryLineEntity.LineType type, String accountCode,
+                                             BigDecimal amount, String description) {
+        JournalEntryLineEntity line = new JournalEntryLineEntity();
+        line.setLineType(type);
+        line.setAccountCode(accountCode);
+        line.setAccountName(resolveAccountName(accountCode));
+        line.setAmount(amount);
+        line.setDescription(description);
+        return line;
+    }
+
     private JournalEntryResult createNewJournalEntry(CreateJournalEntryCommand command) {
         validateCommand(command);
 
@@ -186,6 +268,9 @@ public class JournalEntryApplicationService {
             case "PAYROLL_PAYABLE" -> "Payroll Payable";
             case "CASH"            -> "Cash and Cash Equivalents";
             case "ACCOUNTS_PAY"    -> "Accounts Payable";
+            case "FARMER_PAYABLE"  -> "Farmer Payable";
+            case "PLATFORM_FEE_REVENUE" -> "Platform Fee Revenue";
+            case "DELIVERY_FEE_REVENUE" -> "Delivery Fee Revenue";
             default                -> accountCode;
         };
     }

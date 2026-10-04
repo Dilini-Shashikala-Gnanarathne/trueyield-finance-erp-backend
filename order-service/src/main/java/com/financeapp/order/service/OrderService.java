@@ -335,17 +335,20 @@ public class OrderService {
 
     private void recordOutboxEvent(String eventType, OrderEntity order) {
         try {
-            Map<String, Object> payload = Map.of(
-                    "orderId", order.getId(),
-                    "orderNumber", order.getOrderNumber(),
-                    "buyerId", order.getBuyerId(),
-                    "farmerId", order.getFarmerId(),
-                    "listingId", order.getListingId(),
-                    "quantity", order.getQuantity(),
-                    "totalAmount", order.getTotalAmount(),
-                    "status", "ORDER_" + order.getStatus().name(),
-                    "timestamp", Instant.now().toString()
-            );
+            Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("orderId", order.getId());
+            payload.put("orderNumber", order.getOrderNumber());
+            payload.put("buyerId", order.getBuyerId());
+            payload.put("farmerId", order.getFarmerId());
+            payload.put("listingId", order.getListingId());
+            payload.put("quantity", order.getQuantity());
+            payload.put("subtotal", order.getSubtotal());
+            payload.put("platformFee", order.getPlatformFee());
+            payload.put("deliveryFee", order.getDeliveryFee());
+            payload.put("totalAmount", order.getTotalAmount());
+            payload.put("currency", order.getCurrency());
+            payload.put("status", "ORDER_" + order.getStatus().name());
+            payload.put("timestamp", Instant.now().toString());
 
             OrderOutboxEntity outbox = OrderOutboxEntity.builder()
                     .id(UUID.randomUUID().toString())

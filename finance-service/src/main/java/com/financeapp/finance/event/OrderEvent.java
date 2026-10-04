@@ -18,7 +18,11 @@ public class OrderEvent {
     private String farmerId;
     private String listingId;
     private BigDecimal quantity;
+    private BigDecimal subtotal;
+    private BigDecimal platformFee;
+    private BigDecimal deliveryFee;
     private BigDecimal totalAmount;
+    private String currency;
     private String status;
     private String timestamp;
 }

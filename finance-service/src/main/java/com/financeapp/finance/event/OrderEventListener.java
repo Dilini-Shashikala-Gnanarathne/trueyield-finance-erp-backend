@@ -1,13 +1,20 @@
 package com.financeapp.finance.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.financeapp.finance.dto.CreateJournalEntryCommand;
 import com.financeapp.finance.service.JournalEntryApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * Consumes order events and posts the settlement journal when an order is paid.
+ *
+ * <p>Failures are deliberately propagated (not swallowed) so the container's
+ * {@code DefaultErrorHandler} can retry and finally route the record to the
+ * {@code order.events.DLT} dead-letter topic. Posting is idempotent on the journal
+ * reference, so redelivery is safe.</p>
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -17,32 +24,24 @@ public class OrderEventListener {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "order.events", groupId = "finance-journal-group")
-    public void handleOrderEvent(String message) {
-        try {
-            OrderEvent event = objectMapper.readValue(message, OrderEvent.class);
-            log.info("Received order event: orderId={}, status={}", event.getOrderId(), event.getStatus());
+    public void handleOrderEvent(String message) throws Exception {
+        OrderEvent event = objectMapper.readValue(message, OrderEvent.class);
+        log.info("Received order event: orderId={}, status={}", event.getOrderId(), event.getStatus());
 
-            if ("ORDER_PAID".equals(event.getStatus()) || "ORDER_COMPLETED".equals(event.getStatus())) {
-                // Auto-post settlement journal
-                // DEBIT Cash / CREDIT Revenue
-                
-                CreateJournalEntryCommand journalRequest = CreateJournalEntryCommand.builder()
-                        .reference("ORD-" + event.getOrderId())
-                        .description("Settlement for order " + event.getOrderId())
-                        .debitAccount("CASH")
-                        .creditAccount("REVENUE")
-                        .amount(event.getTotalAmount())
-                        .currency("LKR")
-                        .sourceSystem("order-service")
-                        .entryType("GENERAL_LEDGER")
-                        .build();
-                        
-                journalEntryApplicationService.createJournalEntry(journalRequest);
-                log.info("Auto-posted journal entry for paid/completed order: {}", event.getOrderId());
-            }
-
-        } catch (Exception e) {
-            log.error("Failed to process order event in finance service: {}", message, e);
+        // Cash is received when the buyer pays; post once on ORDER_PAID.
+        // ORDER_COMPLETED needs no further posting (revenue split was booked at payment).
+        if (!"ORDER_PAID".equals(event.getStatus())) {
+            return;
         }
+
+        journalEntryApplicationService.createOrderSettlementJournal(
+                "ORD-PAY-" + event.getOrderId(),
+                "Settlement for order " + event.getOrderNumber(),
+                event.getTotalAmount(),
+                event.getPlatformFee(),
+                event.getDeliveryFee(),
+                event.getCurrency() != null ? event.getCurrency() : "LKR",
+                "order-service");
+        log.info("Auto-posted settlement journal for paid order: {}", event.getOrderId());
     }
 }
