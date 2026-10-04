@@ -3,6 +3,7 @@ package com.financeapp.order.domain.enums;
 public enum OrderStatus {
     PENDING,
     ACCEPTED,
+    PAID,
     REJECTED,
     FULFILLED,
     COMPLETED,

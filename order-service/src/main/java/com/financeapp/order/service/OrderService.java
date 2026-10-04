@@ -174,6 +174,71 @@ public class OrderService {
     }
 
     /**
+     * Buyer pays for an accepted order (ACCEPTED -> PAID). Triggers finance settlement via ORDER_PAID event.
+     */
+    @Transactional
+    public OrderResponse payOrder(String orderId, SecurityPrincipal principal) {
+        OrderEntity order = getOrderOrThrow(orderId);
+        assertBuyerOwnership(order, principal);
+
+        order.pay();
+        OrderEntity updated = orderRepository.save(order);
+        recordOutboxEvent("OrderPaid", updated);
+
+        log.info("Order paid: orderId={}, buyerId={}", orderId, principal.getUserId());
+        return toOrderResponse(updated);
+    }
+
+    /**
+     * Farmer marks a paid order as delivered/fulfilled (PAID -> FULFILLED).
+     */
+    @Transactional
+    public OrderResponse fulfillOrder(String orderId, SecurityPrincipal principal) {
+        OrderEntity order = getOrderOrThrow(orderId);
+        assertFarmerOwnership(order, principal);
+
+        order.fulfill();
+        OrderEntity updated = orderRepository.save(order);
+        recordOutboxEvent("OrderFulfilled", updated);
+
+        log.info("Order fulfilled: orderId={}, farmerId={}", orderId, principal.getUserId());
+        return toOrderResponse(updated);
+    }
+
+    /**
+     * Buyer confirms receipt (PAID/FULFILLED -> COMPLETED). Counts towards dashboards and revenue.
+     */
+    @Transactional
+    public OrderResponse completeOrder(String orderId, SecurityPrincipal principal) {
+        OrderEntity order = getOrderOrThrow(orderId);
+        assertBuyerOwnership(order, principal);
+
+        order.complete();
+        OrderEntity updated = orderRepository.save(order);
+        recordOutboxEvent("OrderCompleted", updated);
+
+        log.info("Order completed: orderId={}, buyerId={}", orderId, principal.getUserId());
+        return toOrderResponse(updated);
+    }
+
+    /**
+     * Buyer cancels an unpaid order (PENDING/ACCEPTED -> CANCELLED). Reserved stock is released
+     * by marketplace-service when it consumes the ORDER_CANCELLED event.
+     */
+    @Transactional
+    public OrderResponse cancelOrder(String orderId, CancelOrderRequest request, SecurityPrincipal principal) {
+        OrderEntity order = getOrderOrThrow(orderId);
+        assertBuyerOwnership(order, principal);
+
+        order.cancel(request != null ? request.getReason() : null);
+        OrderEntity updated = orderRepository.save(order);
+        recordOutboxEvent("OrderCancelled", updated);
+
+        log.info("Order cancelled by buyer: orderId={}, buyerId={}", orderId, principal.getUserId());
+        return toOrderResponse(updated);
+    }
+
+    /**
      * ORDER-008: Buyer Order History (paginated).
      */
     @Transactional(readOnly = true)
@@ -256,6 +321,18 @@ public class OrderService {
         }
     }
 
+    private void assertBuyerOwnership(OrderEntity order, SecurityPrincipal principal) {
+        if (principal == null) {
+            throw new AccessDeniedException("Authentication required.");
+        }
+        if (principal.getRole() == UserRole.ADMIN) {
+            return;
+        }
+        if (principal.getRole() != UserRole.BUYER || !order.getBuyerId().equals(principal.getUserId())) {
+            throw new AccessDeniedException("Only the buyer who placed this order can perform this action.");
+        }
+    }
+
     private void recordOutboxEvent(String eventType, OrderEntity order) {
         try {
             Map<String, Object> payload = Map.of(
@@ -266,7 +343,7 @@ public class OrderService {
                     "listingId", order.getListingId(),
                     "quantity", order.getQuantity(),
                     "totalAmount", order.getTotalAmount(),
-                    "status", order.getStatus().name(),
+                    "status", "ORDER_" + order.getStatus().name(),
                     "timestamp", Instant.now().toString()
             );
 

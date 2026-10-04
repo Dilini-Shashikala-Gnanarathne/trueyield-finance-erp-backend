@@ -22,7 +22,8 @@ public class OrderEventListener {
             OrderEvent event = objectMapper.readValue(message, OrderEvent.class);
             log.info("Received order event: orderId={}, status={}", event.getOrderId(), event.getStatus());
 
-            if ("ORDER_REJECTED".equals(event.getStatus()) || "ORDER_CANCELLED".equals(event.getStatus())) {
+            // ORDER_REJECTED is excluded: order-service releases stock synchronously on reject.
+            if ("ORDER_CANCELLED".equals(event.getStatus())) {
                 ReserveStockRequest releaseReq = new ReserveStockRequest();
                 releaseReq.setQuantity(event.getQuantity());
                 listingService.releaseStock(event.getListingId(), releaseReq);

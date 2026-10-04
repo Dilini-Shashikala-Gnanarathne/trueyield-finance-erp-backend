@@ -108,10 +108,32 @@ public class OrderEntity {
         this.rejectionReason = reason;
     }
 
+    public void pay() {
+        if (this.status != OrderStatus.ACCEPTED) {
+            throw new BusinessException("Cannot pay order in status " + this.status + ". Only ACCEPTED orders can be paid.");
+        }
+        this.status = OrderStatus.PAID;
+    }
+
+    public void fulfill() {
+        if (this.status != OrderStatus.PAID) {
+            throw new BusinessException("Cannot fulfill order in status " + this.status + ". Only PAID orders can be fulfilled.");
+        }
+        this.status = OrderStatus.FULFILLED;
+    }
+
     public void complete() {
-        if (this.status != OrderStatus.ACCEPTED && this.status != OrderStatus.FULFILLED) {
-            throw new BusinessException("Cannot complete order in status " + this.status);
+        if (this.status != OrderStatus.PAID && this.status != OrderStatus.FULFILLED) {
+            throw new BusinessException("Cannot complete order in status " + this.status + ". Order must be PAID or FULFILLED.");
         }
         this.status = OrderStatus.COMPLETED;
+    }
+
+    public void cancel(String reason) {
+        if (this.status != OrderStatus.PENDING && this.status != OrderStatus.ACCEPTED) {
+            throw new BusinessException("Cannot cancel order in status " + this.status + ". Only PENDING or ACCEPTED orders can be cancelled.");
+        }
+        this.status = OrderStatus.CANCELLED;
+        this.rejectionReason = reason;
     }
 }

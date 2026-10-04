@@ -66,6 +66,47 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.ok("Order rejected and reserved stock released.", response));
     }
 
+    @PostMapping("/{id}/pay")
+    @PreAuthorize("hasRole('BUYER') or hasRole('ADMIN')")
+    @Operation(summary = "Buyer pays an accepted order: ACCEPTED -> PAID")
+    public ResponseEntity<ApiResponse<OrderResponse>> payOrder(
+            @PathVariable String id,
+            @AuthenticationPrincipal SecurityPrincipal principal) {
+        OrderResponse response = orderService.payOrder(id, principal);
+        return ResponseEntity.ok(ApiResponse.ok("Order paid successfully.", response));
+    }
+
+    @PostMapping("/{id}/fulfill")
+    @PreAuthorize("hasRole('FARMER') or hasRole('ADMIN')")
+    @Operation(summary = "Farmer marks a paid order as delivered: PAID -> FULFILLED")
+    public ResponseEntity<ApiResponse<OrderResponse>> fulfillOrder(
+            @PathVariable String id,
+            @AuthenticationPrincipal SecurityPrincipal principal) {
+        OrderResponse response = orderService.fulfillOrder(id, principal);
+        return ResponseEntity.ok(ApiResponse.ok("Order marked as fulfilled.", response));
+    }
+
+    @PostMapping("/{id}/complete")
+    @PreAuthorize("hasRole('BUYER') or hasRole('ADMIN')")
+    @Operation(summary = "Buyer confirms receipt: PAID/FULFILLED -> COMPLETED")
+    public ResponseEntity<ApiResponse<OrderResponse>> completeOrder(
+            @PathVariable String id,
+            @AuthenticationPrincipal SecurityPrincipal principal) {
+        OrderResponse response = orderService.completeOrder(id, principal);
+        return ResponseEntity.ok(ApiResponse.ok("Order completed successfully.", response));
+    }
+
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('BUYER') or hasRole('ADMIN')")
+    @Operation(summary = "Buyer cancels an unpaid order: PENDING/ACCEPTED -> CANCELLED, stock released via event")
+    public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(
+            @PathVariable String id,
+            @Valid @RequestBody(required = false) CancelOrderRequest request,
+            @AuthenticationPrincipal SecurityPrincipal principal) {
+        OrderResponse response = orderService.cancelOrder(id, request, principal);
+        return ResponseEntity.ok(ApiResponse.ok("Order cancelled and reserved stock will be released.", response));
+    }
+
     @GetMapping("/buyer/me")
     @PreAuthorize("hasRole('BUYER')")
     @Operation(summary = "Buyer order history with pagination and optional status filter (ORDER-008)")
