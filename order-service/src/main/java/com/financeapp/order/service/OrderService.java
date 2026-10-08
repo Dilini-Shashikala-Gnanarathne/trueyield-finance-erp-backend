@@ -15,6 +15,7 @@ import com.financeapp.order.repository.OrderRepository;
 import com.financeapp.order.security.SecurityPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,7 @@ public class OrderService {
      * Idempotent, concurrency-safe buyer order creation with availability validation & stock reservation.
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse createOrder(CreateOrderRequest request, String idempotencyKey, SecurityPrincipal principal) {
         if (principal == null || principal.getRole() != UserRole.BUYER) {
             throw new AccessDeniedException("Only registered buyers can place orders.");
@@ -141,6 +143,7 @@ public class OrderService {
      * ORDER-006: Farmer Accept Order (PENDING -> ACCEPTED).
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse acceptOrder(String orderId, SecurityPrincipal principal) {
         OrderEntity order = getOrderOrThrow(orderId);
         assertFarmerOwnership(order, principal);
@@ -157,6 +160,7 @@ public class OrderService {
      * ORDER-007: Farmer Reject Order (PENDING -> REJECTED) with stock rollback.
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse rejectOrder(String orderId, RejectOrderRequest request, SecurityPrincipal principal) {
         OrderEntity order = getOrderOrThrow(orderId);
         assertFarmerOwnership(order, principal);
@@ -177,6 +181,7 @@ public class OrderService {
      * Buyer pays for an accepted order (ACCEPTED -> PAID). Triggers finance settlement via ORDER_PAID event.
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse payOrder(String orderId, SecurityPrincipal principal) {
         OrderEntity order = getOrderOrThrow(orderId);
         assertBuyerOwnership(order, principal);
@@ -193,6 +198,7 @@ public class OrderService {
      * Farmer marks a paid order as delivered/fulfilled (PAID -> FULFILLED).
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse fulfillOrder(String orderId, SecurityPrincipal principal) {
         OrderEntity order = getOrderOrThrow(orderId);
         assertFarmerOwnership(order, principal);
@@ -209,6 +215,7 @@ public class OrderService {
      * Buyer confirms receipt (PAID/FULFILLED -> COMPLETED). Counts towards dashboards and revenue.
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse completeOrder(String orderId, SecurityPrincipal principal) {
         OrderEntity order = getOrderOrThrow(orderId);
         assertBuyerOwnership(order, principal);
@@ -226,6 +233,7 @@ public class OrderService {
      * by marketplace-service when it consumes the ORDER_CANCELLED event.
      */
     @Transactional
+    @CacheEvict(value = {"farmerDashboard", "buyerDashboard"}, allEntries = true)
     public OrderResponse cancelOrder(String orderId, CancelOrderRequest request, SecurityPrincipal principal) {
         OrderEntity order = getOrderOrThrow(orderId);
         assertBuyerOwnership(order, principal);

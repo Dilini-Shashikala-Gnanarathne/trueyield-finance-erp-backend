@@ -4,6 +4,7 @@ import com.financeapp.order.domain.enums.OrderStatus;
 import com.financeapp.order.dto.dashboard.*;
 import com.financeapp.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ public class DashboardService {
     private final OrderRepository orderRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "farmerDashboard", key = "#farmerId")
     public FarmerDashboardDto getFarmerDashboard(String farmerId) {
         long pending   = orderRepository.countByFarmerIdAndStatus(farmerId, OrderStatus.PENDING);
         long accepted  = orderRepository.countByFarmerIdAndStatus(farmerId, OrderStatus.ACCEPTED);
@@ -45,6 +47,7 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "buyerDashboard", key = "#buyerId")
     public BuyerDashboardDto getBuyerDashboard(String buyerId) {
         long pending   = orderRepository.countByBuyerIdAndStatus(buyerId, OrderStatus.PENDING);
         long accepted  = orderRepository.countByBuyerIdAndStatus(buyerId, OrderStatus.ACCEPTED);
