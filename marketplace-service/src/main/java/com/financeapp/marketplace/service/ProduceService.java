@@ -8,6 +8,8 @@ import com.financeapp.marketplace.exception.ResourceNotFoundException;
 import com.financeapp.marketplace.repository.ProduceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class ProduceService {
     private final ProduceRepository produceRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "produceCategories", key = "'allActive'")
     public List<ProduceResponse> getAllActiveProduce() {
         return produceRepository.findByIsActiveTrueOrderByCodeAsc()
                 .stream()
@@ -34,6 +37,7 @@ public class ProduceService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "produceCategories", key = "#id")
     public ProduceResponse getProduceById(String id) {
         ProduceEntity produce = produceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produce not found with ID: " + id));
@@ -48,6 +52,7 @@ public class ProduceService {
     }
 
     @Transactional
+    @CacheEvict(value = "produceCategories", allEntries = true)
     public ProduceResponse createProduce(CreateProduceRequest request) {
         String code = request.getCode().toUpperCase().trim();
         if (produceRepository.existsByCode(code)) {
