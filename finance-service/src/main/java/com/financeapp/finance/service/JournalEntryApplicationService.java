@@ -6,6 +6,7 @@ import com.financeapp.finance.dto.JournalEntryResult;
 import com.financeapp.finance.repository.JournalEntryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,7 @@ public class JournalEntryApplicationService {
      * @return the created (or existing) journal entry result
      */
     @Transactional
+    @CacheEvict(value = {"trialBalance", "accountBalances"}, allEntries = true)
     public JournalEntryResult createJournalEntry(CreateJournalEntryCommand command) {
         log.info("Processing journal entry request. reference={}, amount={}, currency={}",
                 command.getReference(), command.getAmount(), command.getCurrency());

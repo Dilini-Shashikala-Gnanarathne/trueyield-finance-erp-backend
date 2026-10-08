@@ -9,6 +9,8 @@ import com.financeapp.finance.repository.JournalEntryLineRepository;
 import com.financeapp.finance.repository.JournalEntryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +65,7 @@ public class FinanceReportService {
      * and marking the original REVERSED. The ledger is never edited in place.
      */
     @Transactional
+    @CacheEvict(value = {"trialBalance", "accountBalances"}, allEntries = true)
     public JournalEntryDto reverseJournalEntry(String reference, String reason, String performedBy) {
         if (reference.startsWith(REVERSAL_PREFIX)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A reversal entry cannot itself be reversed.");
@@ -115,6 +118,7 @@ public class FinanceReportService {
     // ------------------------------------------------------------------
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "trialBalance", key = "'all'")
     public TrialBalanceDto trialBalance() {
         Map<String, BigDecimal[]> totals = new LinkedHashMap<>();
         Map<String, String> names = new LinkedHashMap<>();

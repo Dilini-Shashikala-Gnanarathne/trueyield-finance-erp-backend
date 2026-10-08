@@ -29,6 +29,25 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 2000ms
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000ms # 10 minutes default
+      cache-null-values: false
+
 # ============================================================
 # gRPC Server Configuration (net.devh starter)
 #
