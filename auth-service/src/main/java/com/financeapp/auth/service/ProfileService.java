@@ -20,6 +20,8 @@ import com.financeapp.auth.repository.UserRepository;
 import com.financeapp.auth.security.SecurityPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -67,6 +69,7 @@ public class ProfileService {
      * Updates farmer marketplace and personal profile.
      */
     @Transactional
+    @CacheEvict(value = "sellerProfiles", key = "#principal.userId")
     public FarmerProfileResponse updateFarmerProfile(SecurityPrincipal principal, UpdateFarmerProfileRequest request) {
         UserEntity user = userRepository.findById(principal.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -176,6 +179,7 @@ public class ProfileService {
      * - Protects exact coordinates by rounding to 2 decimal places (~1km approximate) if APPROXIMATE.
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "sellerProfiles", key = "#sellerId")
     public SellerPublicProfileResponse getSellerPublicProfile(String sellerId) {
         UserEntity user = userRepository.findById(sellerId)
                 .filter(u -> u.getRole() == UserRole.FARMER)
