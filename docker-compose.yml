@@ -2,13 +2,15 @@
 # Finance ERP — Docker Compose
 #
 # Services:
-#   postgres             — PostgreSQL (finance_db + user_management_db)
+#   postgres             — PostgreSQL (finance_db, user_management_db, marketplace_db, order_db)
+#   redis                — Redis In-Memory Cache & Distributed Store (:6379)
 #   auth-service         — User management & identity microservice (REST :8085)
 #   finance-service      — Finance microservice (REST :8082 / gRPC :9090)
-#   marketplace-service  — Marketplace microservice
+#   marketplace-service  — Marketplace microservice (REST :8086)
+#   order-service        — Order microservice (REST :8087)
 #   api-gateway          — Spring Cloud Gateway (:8080)
 #
-# Startup order: postgres → finance → auth → marketplace → gateway
+# Startup order: postgres, redis → finance → auth → marketplace → order → gateway
 # =============================================================================
 
 networks:
@@ -18,31 +20,131 @@ networks:
 volumes:
   postgres-data:
     driver: local
+  redis-data:
+    driver: local
 
 services:
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: finance-erp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-erp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      POSTGRES_DB: finance_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - finance-erp-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-erp_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: finance-erp-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - finance-erp-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   auth-service:
     build:
-      context: ./backend
+      context: .
       dockerfile: auth-service/Dockerfile
+    container_name: finance-erp-auth
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finance-erp-net
 
   marketplace-service:
     build:
-      context: ./backend
+      context: .
       dockerfile: marketplace-service/Dockerfile
+    container_name: finance-erp-marketplace
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finance-erp-net
 
   finance-service:
     build:
-      context: ./backend
+      context: .
       dockerfile: finance-service/Dockerfile
-
-  api-gateway:
-    build:
-      context: ./backend
-      dockerfile: api-gateway/Dockerfile
+    container_name: finance-erp-finance
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+      - "9090:9090"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finance-erp-net
 
   order-service:
     build:
-      context: ./backend
+      context: .
       dockerfile: order-service/Dockerfile
+    container_name: finance-erp-order
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finance-erp-net
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: finance-erp-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - finance-erp-net
 
