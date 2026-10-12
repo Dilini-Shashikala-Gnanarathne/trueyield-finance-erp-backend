@@ -18,7 +18,7 @@
     </description>
 
     <modules>
-        <module>proto</module>
+        <module>trueyield-grpc-definitions</module>
         <module>api-gateway</module>
         <module>finance-service</module>
         <module>auth-service</module>
@@ -103,7 +103,7 @@
             <!-- Proto shared module -->
             <dependency>
                 <groupId>com.financeapp</groupId>
-                <artifactId>proto</artifactId>
+                <artifactId>trueyield-grpc-definitions</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

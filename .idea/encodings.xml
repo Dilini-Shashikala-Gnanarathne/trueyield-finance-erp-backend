@@ -17,8 +17,8 @@
     <file url="file://$PROJECT_DIR$/payroll-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payslip-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/payslip-service/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/proto/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/proto/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/trueyield-grpc-definitions/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/trueyield-grpc-definitions/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/user-service/src/main/java" charset="UTF-8" />

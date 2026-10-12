@@ -108,7 +108,7 @@
         <!-- Shared proto stubs (marketplace.proto generated classes) -->
         <dependency>
             <groupId>com.financeapp</groupId>
-            <artifactId>proto</artifactId>
+            <artifactId>trueyield-grpc-definitions</artifactId>
         </dependency>
 
         <!-- Kafka (Outbox relay producer) -->

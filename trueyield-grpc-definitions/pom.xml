@@ -12,8 +12,8 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>proto</artifactId>
-    <name>Finance ERP - Proto Definitions</name>
+    <artifactId>trueyield-grpc-definitions</artifactId>
+    <name>TrueYield - gRPC Definitions</name>
     <description>
         Shared Protocol Buffer definitions for inter-service gRPC communication.
         This module compiles .proto files into Java stubs and is included as a

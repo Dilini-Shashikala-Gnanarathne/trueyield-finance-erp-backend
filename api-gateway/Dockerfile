@@ -5,15 +5,15 @@ WORKDIR /build
 
 # Copy parent POM and proto module first (leverages Docker layer caching)
 COPY pom.xml .
-COPY proto/pom.xml proto/
-COPY proto/src proto/src
+COPY trueyield-grpc-definitions/pom.xml trueyield-grpc-definitions/
+COPY trueyield-grpc-definitions/src trueyield-grpc-definitions/
 
 # Copy api-gateway module
 COPY api-gateway/pom.xml api-gateway/
 COPY api-gateway/src api-gateway/src
 
 # Build proto module first, then api-gateway
-RUN mvn -f proto/pom.xml install -DskipTests --no-transfer-progress
+RUN mvn -f trueyield-grpc-definitions/pom.xml install -DskipTests --no-transfer-progress
 RUN mvn -f api-gateway/pom.xml package -DskipTests --no-transfer-progress
 
 # Stage 2: Runtime image — use smaller JRE image

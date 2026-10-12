@@ -3,12 +3,12 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /build
 
 COPY pom.xml .
-COPY proto/pom.xml proto/
-COPY proto/src proto/src
+COPY trueyield-grpc-definitions/pom.xml trueyield-grpc-definitions/
+COPY trueyield-grpc-definitions/src trueyield-grpc-definitions/
 COPY finance-service/pom.xml finance-service/
 COPY finance-service/src finance-service/src
 
-RUN mvn -f proto/pom.xml install -DskipTests --no-transfer-progress
+RUN mvn -f trueyield-grpc-definitions/pom.xml install -DskipTests --no-transfer-progress
 RUN mvn -f finance-service/pom.xml package -DskipTests --no-transfer-progress
 
 FROM eclipse-temurin:21-jre-alpine
