@@ -1,6 +1,8 @@
 spring:
   application:
     name: auth-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
     url: ${AUTH_DB_URL:${USER_MANAGEMENT_DB_URL:jdbc:postgresql://localhost:5432/user_management_db}}

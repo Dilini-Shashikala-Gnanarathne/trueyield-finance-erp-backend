@@ -1,4 +1,4 @@
-package com.financeapp.finance.domain;
+package com.financeapp.finance.domain.enums;
 
 public enum JournalEntryType {
     PAYROLL,

@@ -1,0 +1,21 @@
+# =============================================================================
+# Auth Service — Production Profile
+# =============================================================================
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+
+logging:
+  level:
+    com.financeapp.auth: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
