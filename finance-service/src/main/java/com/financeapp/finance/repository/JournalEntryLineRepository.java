@@ -1,6 +1,6 @@
 package com.financeapp.finance.repository;
 
-import com.financeapp.finance.domain.JournalEntryLineEntity;
+import com.financeapp.finance.domain.entity.JournalEntryLineEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

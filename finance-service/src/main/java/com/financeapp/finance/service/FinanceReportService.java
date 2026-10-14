@@ -1,9 +1,9 @@
 package com.financeapp.finance.service;
 
-import com.financeapp.finance.domain.JournalEntryEntity;
-import com.financeapp.finance.domain.JournalEntryLineEntity;
-import com.financeapp.finance.domain.JournalEntryLineEntity.LineType;
-import com.financeapp.finance.domain.JournalEntryStatus;
+import com.financeapp.finance.domain.entity.JournalEntryEntity;
+import com.financeapp.finance.domain.entity.JournalEntryLineEntity;
+import com.financeapp.finance.domain.entity.JournalEntryLineEntity.LineType;
+import com.financeapp.finance.domain.enums.JournalEntryStatus;
 import com.financeapp.finance.dto.report.FinanceReportDtos.*;
 import com.financeapp.finance.repository.JournalEntryLineRepository;
 import com.financeapp.finance.repository.JournalEntryRepository;

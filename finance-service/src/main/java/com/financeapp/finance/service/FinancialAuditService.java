@@ -1,7 +1,7 @@
 package com.financeapp.finance.service;
 
-import com.financeapp.finance.domain.JournalEntryAuditEntity;
-import com.financeapp.finance.domain.JournalEntryEntity;
+import com.financeapp.finance.domain.entity.JournalEntryAuditEntity;
+import com.financeapp.finance.domain.entity.JournalEntryEntity;
 import com.financeapp.finance.repository.JournalEntryAuditRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

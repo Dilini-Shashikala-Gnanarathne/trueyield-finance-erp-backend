@@ -1,7 +1,7 @@
 package com.financeapp.finance.repository;
 
-import com.financeapp.finance.domain.JournalEntryEntity;
-import com.financeapp.finance.domain.JournalEntryStatus;
+import com.financeapp.finance.domain.entity.JournalEntryEntity;
+import com.financeapp.finance.domain.enums.JournalEntryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

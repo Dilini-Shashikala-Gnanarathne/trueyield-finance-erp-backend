@@ -1,6 +1,7 @@
 package com.financeapp.finance.service;
 
-import com.financeapp.finance.domain.*;
+import com.financeapp.finance.domain.entity.*;
+import com.financeapp.finance.domain.enums.*;
 import com.financeapp.finance.dto.CreateJournalEntryCommand;
 import com.financeapp.finance.dto.JournalEntryResult;
 import com.financeapp.finance.repository.JournalEntryRepository;
