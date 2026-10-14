@@ -1,0 +1,8 @@
+# =============================================================================
+# API Gateway — Development Profile
+# =============================================================================
+logging:
+  level:
+    com.financeapp.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO

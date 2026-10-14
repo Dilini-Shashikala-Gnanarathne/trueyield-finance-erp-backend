@@ -1,0 +1,8 @@
+# =============================================================================
+# API Gateway — Production Profile
+# =============================================================================
+logging:
+  level:
+    com.financeapp.gateway: INFO
+    org.springframework.cloud.gateway: WARN
+    reactor.netty: WARN
