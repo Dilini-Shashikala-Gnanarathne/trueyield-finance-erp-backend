@@ -1,6 +1,6 @@
 package com.financeapp.finance.controller;
 
-import com.financeapp.finance.domain.JournalEntryStatus;
+import com.financeapp.finance.domain.enums.JournalEntryStatus;
 import com.financeapp.finance.dto.report.FinanceReportDtos.*;
 import com.financeapp.finance.security.SecurityPrincipal;
 import com.financeapp.finance.service.FinanceReportService;

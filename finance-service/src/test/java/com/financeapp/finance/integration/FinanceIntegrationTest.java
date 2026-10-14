@@ -1,6 +1,6 @@
 package com.financeapp.finance.integration;
 
-import com.financeapp.finance.domain.JournalEntryStatus;
+import com.financeapp.finance.domain.enums.JournalEntryStatus;
 import com.financeapp.finance.dto.CreateJournalEntryCommand;
 import com.financeapp.finance.dto.JournalEntryResult;
 import com.financeapp.finance.repository.JournalEntryRepository;
