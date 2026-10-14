@@ -1,4 +1,4 @@
-package com.financeapp.gateway;
+package com.financeapp.gateway.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

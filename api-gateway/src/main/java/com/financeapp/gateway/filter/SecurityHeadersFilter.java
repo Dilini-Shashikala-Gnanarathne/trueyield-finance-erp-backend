@@ -1,4 +1,4 @@
-package com.financeapp.gateway;
+package com.financeapp.gateway.filter;
 
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;

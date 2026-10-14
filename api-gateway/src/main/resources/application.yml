@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   data:
     redis:
