@@ -1,6 +1,8 @@
 spring:
   application:
     name: order-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
     url: ${ORDER_DB_URL:jdbc:postgresql://localhost:5432/order_db}
